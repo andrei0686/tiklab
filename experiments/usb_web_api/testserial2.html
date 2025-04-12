@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Serial Terminal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .control-panel {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #0069d9;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+        select, input {
+            padding: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .terminal {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            min-height: 200px;
+            max-height: 1400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .settings-row label {
+            margin-right: 10px;
+        }
+        .hex-byte {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Web Serial Terminal</h1>
+    
+    <div class="control-panel">
+        <h2>Настройки подключения</h2>
+        <div class="settings-row">
+            <label>Скорость (бод):</label>
+            <select id="baudRate">
+                <option value="9600">9600</option>
+                <option value="19200">19200</option>
+                <option value="38400">38400</option>
+                <option value="57600">57600</option>
+                <option value="115200" selected>115200</option>
+            </select>
+            
+            <label>Биты данных:</label>
+            <select id="dataBits">
+                <option value="7">7</option>
+                <option value="8" selected>8</option>
+            </select>
+            
+            <label>Четность:</label>
+            <select id="parity">
+                <option value="none" selected>Нет</option>
+                <option value="even">Четная</option>
+                <option value="odd">Нечетная</option>
+            </select>
+            
+            <label>Стоп-биты:</label>
+            <select id="stopBits">
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+            </select>
+        </div>
+        
+        <button id="connectBtn">Подключиться</button>
+        <button id="disconnectBtn" disabled>Отключиться</button>
+        
+        <div id="status" class="status disconnected">Не подключено</div>
+    </div>
+    
+    <div>
+        <h2>Настройки вывода</h2>
+        <div class="settings-row">
+            <label>
+                <input type="radio" name="outputMode" value="ascii" checked> ASCII
+            </label>
+            <label>
+                <input type="radio" name="outputMode" value="hex"> HEX
+            </label>
+            <label>
+                <input type="checkbox" id="newLineAfterRead"> Новая строка после чтения
+            </label>
+        </div>
+    </div>
+    
+    <div>
+        <h2>Отправка данных</h2>
+        <textarea id="sendData" placeholder="Введите данные для отправки..."></textarea>
+        <button id="sendBtn" disabled>Отправить</button>
+        <button id="sendCrLfBtn" disabled>Отправить с CR+LF</button>
+    </div>
+    
+    <div>
+        <h2>Полученные данные</h2>
+        <div class="terminal" id="receivedData"></div>
+        <button id="clearBtn">Очистить</button>
+    </div>
+
+    <script>
+        let port;
+        let reader;
+        let keepReading = true;
+        let outputMode = 'ascii';
+        let newLineAfterRead = false;
+        
+        // Элементы интерфейса
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const sendCrLfBtn = document.getElementById('sendCrLfBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusDiv = document.getElementById('status');
+        const receivedDataDiv = document.getElementById('receivedData');
+        const sendDataTextarea = document.getElementById('sendData');
+        const outputModeRadios = document.getElementsByName('outputMode');
+        const newLineAfterReadCheckbox = document.getElementById('newLineAfterRead');
+        
+        // Обработчики кнопок
+        connectBtn.addEventListener('click', connectToSerial);
+        disconnectBtn.addEventListener('click', disconnectFromSerial);
+        sendBtn.addEventListener('click', () => sendData(false));
+        sendCrLfBtn.addEventListener('click', () => sendData(true));
+        clearBtn.addEventListener('click', clearTerminal);
+        
+        // Обработчики настроек вывода
+        Array.from(outputModeRadios).forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                outputMode = e.target.value;
+            });
+        });
+        
+        newLineAfterReadCheckbox.addEventListener('change', (e) => {
+            newLineAfterRead = e.target.checked;
+        });
+        
+        // Подключение к последовательному порту
+        async function connectToSerial() {
+            try {
+                // Запрос порта у пользователя
+                port = await navigator.serial.requestPort();
+                
+                // Настройки подключения
+                const baudRate = parseInt(document.getElementById('baudRate').value);
+                const dataBits = parseInt(document.getElementById('dataBits').value);
+                const parity = document.getElementById('parity').value;
+                const stopBits = parseInt(document.getElementById('stopBits').value);
+                
+                // Открытие порта с настройками
+                await port.open({
+                    baudRate: baudRate,
+                    dataBits: dataBits,
+                    parity: parity,
+                    stopBits: stopBits,
+                    flowControl: 'none'
+                });
+                
+                // Обновление интерфейса
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                sendBtn.disabled = false;
+                sendCrLfBtn.disabled = false;
+                statusDiv.textContent = `Подключено: ${port.getInfo().usbProductId || 'Устройство'}`;
+                statusDiv.className = 'status connected';
+                
+                // Запуск чтения данных
+                keepReading = true;
+                readData();
+                
+            } catch (error) {
+                console.error('Ошибка подключения:', error);
+                statusDiv.textContent = `Ошибка: ${error.message}`;
+                statusDiv.className = 'status disconnected';
+            }
+        }
+        
+        // Чтение данных из порта
+        async function readData() {
+            while (port && keepReading) {
+                try {
+                    reader = port.readable.getReader();
+                    const { value, done } = await reader.read();
+                    
+                    if (done) {
+                        reader.releaseLock();
+                        break;
+                    }
+                    
+                    if (value) {
+                        // Обработка полученных данных в соответствии с настройками
+                        processReceivedData(value);
+                    }
+                    
+                    reader.releaseLock();
+                    
+                } catch (error) {
+                    console.error('Ошибка чтения:', error);
+                    if (error.message.includes('The device has been lost')) {
+                        disconnectFromSerial();
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Обработка полученных данных
+        function processReceivedData(data) {
+            if (outputMode === 'hex') {
+                // HEX режим
+                let hexString = '';
+                for (let i = 0; i < data.length; i++) {
+                    const byte = data[i];
+                    hexString += `<span class="hex-byte">0x${byte.toString(16).padStart(2, '0')} </span>`;
+                }
+                receivedDataDiv.innerHTML += hexString;
+            } else {
+                // ASCII режим
+                const text = new TextDecoder().decode(data);
+                receivedDataDiv.textContent += text;
+            }
+            
+            // Добавление перевода строки если нужно
+            if (newLineAfterRead) {
+                receivedDataDiv.textContent += '\n';
+            }
+            
+            // Автопрокрутка вниз
+            receivedDataDiv.scrollTop = receivedDataDiv.scrollHeight;
+        }
+        
+        // Отправка данных в порт
+        async function sendData(addCrLf) {
+            if (!port || !sendDataTextarea.value) return;
+            
+            try {
+                const writer = port.writable.getWriter();
+                let data = sendDataTextarea.value;
+                
+                if (addCrLf) {
+                    data += '\r\n'; // Добавление CR+LF
+                }
+                
+                await writer.write(new TextEncoder().encode(data));
+                writer.releaseLock();
+                
+                // Логирование отправленных данных
+                receivedDataDiv.textContent += `>> ${data}${addCrLf ? '' : '\n'}`;
+                receivedDataDiv.scrollTop = receivedDataDiv.scrollHeight;
+                
+            } catch (error) {
+                console.error('Ошибка отправки:', error);
+                statusDiv.textContent = `Ошибка отправки: ${error.message}`;
+                statusDiv.className = 'status disconnected';
+            }
+        }
+        
+        // Очистка терминала
+        function clearTerminal() {
+            receivedDataDiv.textContent = '';
+            receivedDataDiv.innerHTML = '';
+        }
+        
+        // Отключение от порта
+        async function disconnectFromSerial() {
+            try {
+                keepReading = false;
+                
+                if (reader) {
+                    await reader.cancel();
+                    reader.releaseLock();
+                }
+                
+                if (port) {
+                    await port.close();
+                }
+                
+                // Обновление интерфейса
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                sendBtn.disabled = true;
+                sendCrLfBtn.disabled = true;
+                statusDiv.textContent = 'Не подключено';
+                statusDiv.className = 'status disconnected';
+                
+            } catch (error) {
+                console.error('Ошибка отключения:', error);
+                statusDiv.textContent = `Ошибка отключения: ${error.message}`;
+                statusDiv.className = 'status disconnected';
+            }
+        }
+        
+        // Отключение при закрытии страницы
+        window.addEventListener('beforeunload', disconnectFromSerial);
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebUSB Device List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    button {
+      background: #0078d7;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    #devicesList {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .device {
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #f5f5f5;
+      border-radius: 4px;
+    }
+    .device h3 {
+      margin: 0 0 5px 0;
+    }
+    .device p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebUSB Device List</h1>
+  <button id="requestDevice">Request USB Device</button>
+  <div id="devicesList">
+    <p>No devices selected yet.</p>
+  </div>
+
+  <script>
+    document.getElementById("requestDevice").addEventListener("click", async () => {
+      try {
+        // 1. Запрашиваем устройство у пользователя (без фильтра, покажет все)
+        const device = await navigator.usb.requestDevice({
+          filters: [] // Можно указать фильтры, например: { vendorId: 0x1234 }
+        });
+
+        // 2. Отображаем информацию об устройстве
+        displayDeviceInfo(device);
+
+        // 3. Подключаемся к устройству и читаем конфигурацию
+        await device.open();
+        await device.selectConfiguration(1);
+        await device.claimInterface(0);
+
+        console.log("Устройство открыто:", device);
+
+      } catch (error) {
+        console.error("Ошибка:", error);
+        document.getElementById("devicesList").innerHTML = `
+          <p style="color: red;">Error: ${error.message}</p>
+        `;
+      }
+    });
+
+    // Функция для отображения информации об устройстве
+    function displayDeviceInfo(device) {
+      const devicesList = document.getElementById("devicesList");
+      
+      devicesList.innerHTML = `
+        <div class="device">
+          <h3>${device.productName || "Unknown Device"}</h3>
+          <p><strong>Vendor ID:</strong> 0x${device.vendorId.toString(16)}</p>
+          <p><strong>Product ID:</strong> 0x${device.productId.toString(16)}</p>
+          <p><strong>Serial Number:</strong> ${device.serialNumber || "N/A"}</p>
+          <p><strong>Manufacturer:</strong> ${device.manufacturerName || "N/A"}</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

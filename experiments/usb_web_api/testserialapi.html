@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Serial API Пример</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    #console {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 80%;
+      height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Web Serial API Пример</h1>
+  <button id="connectButton">Подключиться к устройству</button>
+  <button id="disconnectButton" disabled>Отключиться от устройства</button>
+  <button id="sendButton" disabled>Отправить данные</button>
+  <input id="dataToSend" type="text" placeholder="Введите данные для отправки">
+  <div id="console"></div>
+
+  <script>
+    let port;
+
+    // Добавляем обработчики событий для подключения и отключения устройств
+    navigator.serial.addEventListener("connect", (e) => {
+      console.log("Устройство подключено:", e.target);
+      document.getElementById("connectButton").disabled = true;
+      document.getElementById("disconnectButton").disabled = false;
+    });
+
+    navigator.serial.addEventListener("disconnect", (e) => {
+      console.log("Устройство отключено:", e.target);
+      document.getElementById("connectButton").disabled = false;
+      document.getElementById("disconnectButton").disabled = true;
+      document.getElementById("sendButton").disabled = true;
+    });
+
+    // Функция для запроса доступа к последовательному порту
+    async function requestPort() {
+      try {
+        // Запрашиваем доступ к порту с фильтром по USB-идентификатору
+        const usbVendorId = 0x2341; // Пример идентификатора производителя
+        const portRequest = await navigator.serial.requestPort({
+          filters: [{ usbVendorId }]
+        });
+        return portRequest;
+      } catch (error) {
+        console.error("Ошибка при запросе порта:", error);
+      }
+    }
+
+    // Функция для открытия порта и установки параметров
+    async function openPort(port) {
+      try {
+        // Открываем порт с заданными параметрами
+        await port.open({
+          baudRate: 9600, // Скорость передачи данных
+          dataBits: 8,    // Количество бит данных
+          stopBits: 1,    // Количество стоп-битов
+          parity: "none", // Контроль четности
+          flowControl: "none" // Управление потоком
+        });
+        console.log("Порт открыт");
+        document.getElementById("sendButton").disabled = false;
+      } catch (error) {
+        console.error("Ошибка при открытии порта:", error);
+      }
+    }
+
+    // Функция для отправки данных
+    async function sendData(port, data) {
+      try {
+        const writer = port.writable.getWriter();
+        await writer.write(data);
+        await writer.close();
+        console.log("Данные отправлены");
+        logToConsole("Данные отправлены");
+      } catch (error) {
+        console.error("Ошибка при отправке данных:", error);
+      }
+    }
+
+    // Функция для приема данных
+    async function readData(port) {
+      try {
+        const reader = port.readable.getReader();
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            console.log("Чтение завершено");
+            logToConsole("Чтение завершено");
+            break;
+          }
+          console.log("Принятые данные:", value);
+          logToConsole(`Принятые данные: ${new TextDecoder().decode(value)}`);
+        }
+        reader.releaseLock();
+      } catch (error) {
+        console.error("Ошибка при чтении данных:", error);
+      }
+    }
+
+    // Функция для вывода сообщений в консоль на странице
+    function logToConsole(message) {
+      const consoleDiv = document.getElementById("console");
+      const logMessage = document.createElement("div");
+      logMessage.textContent = message;
+      consoleDiv.appendChild(logMessage);
+      consoleDiv.scrollTop = consoleDiv.scrollHeight;
+    }
+
+    // Обработчик кнопки подключения
+    document.getElementById("connectButton").addEventListener("click", async () => {
+      port = await requestPort();
+      if (port) {
+        await openPort(port);
+        await readData(port);
+      }
+    });
+
+    // Обработчик кнопки отключения
+    document.getElementById("disconnectButton").addEventListener("click", async () => {
+      if (port) {
+        await port.close();
+        port = null;
+        document.getElementById("disconnectButton").disabled = true;
+        document.getElementById("connectButton").disabled = false;
+        document.getElementById("sendButton").disabled = true;
+      }
+    });
+
+    // Обработчик кнопки отправки данных
+    document.getElementById("sendButton").addEventListener("click", async () => {
+      if (port) {
+        const dataToSend = new TextEncoder().encode(document.getElementById("dataToSend").value);
+        await sendData(port, dataToSend);
+      }
+    });
+  </script>
+</body>
+</html>
