@@ -3,6 +3,10 @@
 
 `npm install swagger-jsdoc swagger-ui-express express`
 
+Запуск проекта
+
+`node .\app.js`
+
 Документация доступна по адресу: 
 
 `http://localhost:3000/api-docs`
