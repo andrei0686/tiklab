@@ -6,7 +6,7 @@ const router = express.Router();
  * @swagger
  * components:
  *   schemas:
- *     User:
+ *     user:
  *       type: object
  *       properties:
  *         id:
@@ -22,7 +22,7 @@ const router = express.Router();
  * /users:
  *   get:
  *     summary: Получить список пользователей
- *     tags: [Users]
+ *     tags: [users]
  *     responses:
  *       200:
  *         description: Список пользователей
@@ -31,9 +31,9 @@ const router = express.Router();
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/User'
+ *                 $ref: '#/components/schemas/user'
  */
-router.get('/users', (req, res) => {
+router.get('/', (req, res) => {
   res.json([{ id: 1, name: 'John' }]);
 });
 
@@ -42,7 +42,7 @@ router.get('/users', (req, res) => {
  * /users/{id}:
  *   get:
  *     summary: Получить пользователя по ID
- *     tags: [Users]
+ *     tags: [users]
  *     parameters:
  *       - in: path
  *         name: id
@@ -55,9 +55,9 @@ router.get('/users', (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/user'
  */
-router.get('/users/:id', (req, res) => {
+router.get('/:id', (req, res) => {
   res.json({ id: req.params.id, name: 'John' });
 });
 

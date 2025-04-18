@@ -1,4 +1,8 @@
 const express = require('express');
+const usersRouter = require('./routes/users'); // Импортируем роутер
+const storagesRouter = require('./routes/storages'); // Импортируем роутер
+const ordersRouter = require('./routes/orders'); // Импортируем роутер
+
 const swaggerUi = require('swagger-ui-express');
 //const swaggerSpec = require('./swagger-definition');
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -41,6 +45,12 @@ app.get('/openapi.yaml', (req, res) => {
     res.setHeader('Content-Type', 'text/yaml');
     res.send(yamlString);
   });
+
+
+app.use(express.json()); // Middleware для парсинга JSON
+app.use('/users', usersRouter); // Подключаем роутер
+app.use('/storages', storagesRouter); // Подключаем роутер
+app.use('/orders', ordersRouter); // Подключаем роутер
 
 app.listen(3000, () => {
   console.log('Сервер запущен на http://localhost:3000');
