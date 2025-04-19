@@ -244,7 +244,6 @@ router.post('/:idUser/orders', (req, res) => {
     ]
   });
 });
-
 /**
  * @swagger
  * /v1/users/{idUser}/orders/{idOrder}:
@@ -257,11 +256,13 @@ router.post('/:idUser/orders', (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
+ *           example: 1
  *       - in: path
  *         name: idOrder
  *         required: true
  *         schema:
  *           type: integer
+ *           example: 45
  *     requestBody:
  *       required: true
  *       content:
@@ -275,18 +276,77 @@ router.post('/:idUser/orders', (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Не найдено
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               userNotFound:
+ *                 value:
+ *                   error: "Пользователь не найден"
+ *                   message: "Пользователь с ID 999 не найден"
+ *                   statusCode: 404
+ *               orderNotFound:
+ *                 value:
+ *                   error: "Заказ не найден"
+ *                   message: "Заказ с ID 999 не найден"
+ *                   statusCode: 404
+ *               productNotFound:
+ *                 value:
+ *                   error: "Товар не найден"
+ *                   message: "Товар с ID 999 не найден"
+ *                   statusCode: 404
  */
 router.post('/:idUser/orders/:idOrder', (req, res) => {
-  const { idProduct, count } = req.body;
-  res.json({
-    idUser: req.params.idUser,
-    region: 1,
-    idOrder: req.params.idOrder,
-    products: [
-      { idProduct: 123, count: 4 },
-      { idProduct: 22, count: 2 }
-    ]
-  });
+  try {
+    const { idProduct, count } = req.body;
+    const { idUser, idOrder } = req.params;
+
+    // Проверка существования пользователя 
+    if (idUser > 100) {
+      return res.status(404).json({
+        error: "Пользователь не найден",
+        message: `Пользователь с ID ${idUser} не найден`,
+        statusCode: 404
+      });
+    }
+
+    // Проверка существования заказа 
+    if (idOrder > 100) {
+      return res.status(404).json({
+        error: "Заказ не найден",
+        message: `Заказ с ID ${idOrder} не найден`,
+        statusCode: 404
+      });
+    }
+
+    // Проверка существования товара 
+    if (idProduct > 1000) {
+      return res.status(404).json({
+        error: "Товар не найден",
+        message: `Товар с ID ${idProduct} не найден`,
+        statusCode: 404
+      });
+    }
+
+    res.json({
+      idUser: Number(idUser),
+      region: 1,
+      idOrder: Number(idOrder),
+      products: [
+        { idProduct: Number(idProduct), count: Number(count) },
+        { idProduct: 22, count: 2 }
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: error.message,
+      statusCode: 500
+    });
+  }
 });
 
 /**
