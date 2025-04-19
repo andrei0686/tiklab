@@ -13,7 +13,7 @@ const router = express.Router();
  *           example: 1
  *         name:
  *           type: string
- *           example: "Вася Пупкин"
+ *           example: "Гена крокодил"
  *         phone:
  *           type: string
  *           example: "444444"
@@ -21,8 +21,8 @@ const router = express.Router();
  *           type: string
  *           example: ""
  *         region:
- *           type: string
- *           example: "центральный"
+ *           type: integer
+ *           example: 1
  *     UserInput:
  *       type: object
  *       properties:
@@ -36,8 +36,8 @@ const router = express.Router();
  *           type: string
  *           example: ""
  *         region:
- *           type: string
- *           example: "центральный"
+ *           type: integer
+ *           example: 1
  *       required:
  *         - name
  *         - phone
@@ -52,8 +52,8 @@ const router = express.Router();
  *           type: integer
  *           example: 1
  *         region:
- *           type: string
- *           example: "1"
+ *           type: integer
+ *           example: 1
  *         products:
  *           type: array
  *           items:
@@ -71,8 +71,8 @@ const router = express.Router();
  *       type: object
  *       properties:
  *         region:
- *           type: string
- *           example: "1"
+ *           type: integer
+ *           example: 1
  *       required:
  *         - region
  *     OrderProductInput:
@@ -132,7 +132,7 @@ router.post('/', (req, res) => {
  *                 $ref: '#/components/schemas/User'
  */
 router.get('/', (req, res) => {
-  res.json([{ id: 1, name: 'Вася Пупкин', phone: '444444', address: '', region: 'центральный' }]);
+  res.json([{ id: 1, name: 'Генадий ', phone: '444444', address: '', region: 1 }]);
 });
 
 /**
@@ -158,10 +158,10 @@ router.get('/', (req, res) => {
 router.get('/:idUser', (req, res) => {
   res.json({ 
     id: req.params.idUser, 
-    name: 'Вася Пупкин', 
+    name: 'Алексей Всемогущий', 
     phone: '444444', 
     address: '', 
-    region: 'центральный' 
+    region: 1 
   });
 });
 
@@ -202,7 +202,7 @@ router.patch('/:idUser', (req, res) => {
     name: name || 'Алеша А', 
     phone: '444444', 
     address: '', 
-    region: 'центральный' 
+    region: 1 
   });
 });
 
@@ -280,7 +280,7 @@ router.post('/:idUser/orders/:idOrder', (req, res) => {
   const { idProduct, count } = req.body;
   res.json({
     idUser: req.params.idUser,
-    region: '1',
+    region: 1,
     idOrder: req.params.idOrder,
     products: [
       { idProduct: 123, count: 4 },
@@ -324,7 +324,7 @@ router.patch('/:idUser/orders/:idOrder', (req, res) => {
   const { idProduct, count } = req.body;
   res.json({
     idUser: req.params.idUser,
-    region: '1',
+    region: 1,
     idOrder: req.params.idOrder,
     products: [
       { idProduct: 123, count: 7 },
@@ -367,7 +367,7 @@ router.delete('/:idUser/orders/:idOrder', (req, res) => {
   const { idProduct } = req.query;
   res.json({
     idUser: req.params.idUser,
-    region: '1',
+    region: 1,
     idOrder: req.params.idOrder,
     products: [
       { idProduct: 123, count: 4 },
@@ -404,7 +404,7 @@ router.delete('/:idUser/orders/:idOrder', (req, res) => {
 router.get('/:idUser/orders/:idOrder', (req, res) => {
   res.json({
     idUser: req.params.idUser,
-    region: '1',
+    region: 1,
     idOrder: req.params.idOrder,
     products: [
       { idProduct: 123, count: 4 },
@@ -444,7 +444,7 @@ router.get('/:idUser/orders', (req, res) => {
   const { state } = req.query;
   res.json([{
     idUser: req.params.idUser,
-    region: '1',
+    region: 1,
     idOrder: 45,
     products: [
       { idProduct: 123, count: 4 },

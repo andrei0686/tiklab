@@ -202,20 +202,16 @@ router.post('/:idStorage/reserves', (req, res) => {
  *         required: true
  *         schema:
  *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               idProduct:
- *                 type: integer
- *               idOrder:
- *                 type: integer
- *             required:
- *               - idProduct
- *               - idOrder
+ *       - in: query
+ *         name: idProduct
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: idOrder
+ *         required: true
+ *         schema:
+ *           type: integer
  *     responses:
  *       204:
  *         description: Резерв успешно удален
@@ -225,7 +221,7 @@ router.post('/:idStorage/reserves', (req, res) => {
  *         description: Резерв не найден
  */
 router.delete('/:idStorage/reserves', (req, res) => {
-  const { idProduct, idOrder } = req.body;
+  const { idProduct, idOrder } = req.query;
   if (!idProduct || !idOrder) {
     return res.status(400).json({ error: "Необходимо указать idProduct и idOrder" });
   }

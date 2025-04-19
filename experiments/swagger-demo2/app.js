@@ -1,12 +1,10 @@
 const express = require('express');
 const usersRouter = require('./v1/users'); // Импортируем роутер
 const storagesRouter = require('./v1/storages'); // Импортируем роутер
-const ordersRouter = require('./v1/orders'); // Импортируем роутер
 const productsRouter = require('./v1/products'); // Импортируем роутер
 const pricesRouter = require('./v1/prices'); // Импортируем роутер
 
 const swaggerUi = require('swagger-ui-express');
-//const swaggerSpec = require('./swagger-definition');
 const swaggerJSDoc = require('swagger-jsdoc');
 const fs = require('fs');
 const YAML = require('yaml');
@@ -39,11 +37,11 @@ const swaggerOptions = {
         }
       },
       tags: [
-        { name: 'Products', description: 'Операции с продуктами' },
-        { name: 'Users', description: 'Операции с пользователями' },
-        { name: 'Orders', description: 'Операции с заказами' },
         { name: 'Storages', description: 'Операции со складами' },
-        { name: 'Prices', description: 'Операции с ценами и скидками' }
+        { name: 'Products', description: 'Операции с продуктами' },
+       // { name: 'Orders', description: 'Операции с заказами' }, 
+        { name: 'Prices', description: 'Операции с ценами и скидками' },
+        { name: 'Users', description: 'Операции с пользователями' }
       ]
     },
     apis: ['./v1/*.js'], // Путь к файлам с JSDoc
@@ -78,7 +76,6 @@ app.get('/openapi.yaml', (req, res) => {
 app.use(express.json()); // Middleware для парсинга JSON
 app.use('/v1/users', usersRouter);
 app.use('/v1/storages', storagesRouter);
-app.use('/v1/orders', ordersRouter);
 app.use('/v1/products', productsRouter);
 app.use('/v1/prices', pricesRouter);
 
