@@ -1,9 +1,395 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "12 стульев",
-    "version": "1.0.0"
+    "title": "12 стульев API",
+    "version": "1.0.0",
+    "description": "API для управления продуктами, пользователями и заказами"
   },
+  "servers": [
+    {
+      "url": "http://localhost:3000/",
+      "description": "Локальный сервер (v1)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "idOrder": {
+            "type": "integer",
+            "example": 45
+          },
+          "idUser": {
+            "type": "integer",
+            "example": 1
+          },
+          "region": {
+            "type": "string",
+            "example": "1"
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "idProduct": {
+            "type": "integer",
+            "example": 123
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 2
+          },
+          "idStorage": {
+            "type": "integer",
+            "example": 789
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 99.99
+          },
+          "discount": {
+            "type": "number",
+            "format": "float",
+            "example": 10
+          },
+          "promotionId": {
+            "type": "integer",
+            "example": 55
+          },
+          "count": {
+            "type": "integer",
+            "example": 4
+          }
+        }
+      },
+      "AddProductResponse": {
+        "type": "object",
+        "properties": {
+          "idOrder": {
+            "type": "integer",
+            "example": 1
+          },
+          "quantityAdded": {
+            "type": "integer",
+            "example": 2
+          }
+        }
+      },
+      "Price": {
+        "type": "object",
+        "properties": {
+          "idPrice": {
+            "type": "integer",
+            "example": 3
+          },
+          "idProduct": {
+            "type": "integer",
+            "example": 4
+          },
+          "idStorage": {
+            "type": "integer",
+            "example": 1
+          },
+          "idPromotion": {
+            "type": "integer",
+            "example": 4
+          },
+          "price": {
+            "type": "number",
+            "format": "float",
+            "example": 332
+          },
+          "sale": {
+            "type": "integer",
+            "example": 15
+          },
+          "count": {
+            "type": "integer",
+            "example": 6
+          }
+        }
+      },
+      "PriceArray": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Price"
+        },
+        "example": [
+          {
+            "idPrice": 3,
+            "idProduct": 4,
+            "idStorage": 1,
+            "idPromotion": 4,
+            "price": 332,
+            "sale": 15,
+            "count": 6
+          },
+          {
+            "idPrice": 2,
+            "idProduct": 4,
+            "idStorage": 2,
+            "idPromotion": 4,
+            "price": 332,
+            "sale": 10,
+            "count": 16
+          }
+        ]
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "idProduct": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Стол"
+          },
+          "description": {
+            "type": "string",
+            "example": "Обеденный"
+          }
+        }
+      },
+      "ProductInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Стул"
+          },
+          "description": {
+            "type": "string",
+            "example": "Кухонный"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "продукт не найден"
+          },
+          "message": {
+            "type": "string",
+            "example": "запрошенный ID 99 не найден"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 404
+          }
+        }
+      },
+      "Storage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Склад 1"
+          }
+        }
+      },
+      "Reserve": {
+        "type": "object",
+        "properties": {
+          "idReserve": {
+            "type": "integer",
+            "example": 6
+          },
+          "idProduct": {
+            "type": "integer",
+            "example": 5
+          },
+          "idOrder": {
+            "type": "integer",
+            "example": 3
+          },
+          "count": {
+            "type": "integer",
+            "example": 3
+          }
+        }
+      },
+      "ReserveInput": {
+        "type": "object",
+        "properties": {
+          "idOrder": {
+            "type": "integer",
+            "example": 3
+          },
+          "count": {
+            "type": "integer",
+            "example": 10
+          }
+        },
+        "required": [
+          "idOrder",
+          "count"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "Вася Пупкин"
+          },
+          "phone": {
+            "type": "string",
+            "example": "444444"
+          },
+          "address": {
+            "type": "string",
+            "example": ""
+          },
+          "region": {
+            "type": "string",
+            "example": "центральный"
+          }
+        }
+      },
+      "UserInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Вася"
+          },
+          "phone": {
+            "type": "string",
+            "example": "444444"
+          },
+          "address": {
+            "type": "string",
+            "example": ""
+          },
+          "region": {
+            "type": "string",
+            "example": "центральный"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "region"
+        ]
+      },
+      "OrderInput": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string",
+            "example": "1"
+          }
+        },
+        "required": [
+          "region"
+        ]
+      },
+      "OrderProductInput": {
+        "type": "object",
+        "properties": {
+          "idProduct": {
+            "type": "integer",
+            "example": 123
+          },
+          "count": {
+            "type": "integer",
+            "example": 4
+          }
+        },
+        "required": [
+          "idProduct",
+          "count"
+        ]
+      }
+    },
+    "examples": {
+      "StorageArrayExample": {
+        "value": [
+          {
+            "id": 1,
+            "name": "Склад 1"
+          },
+          {
+            "id": 2,
+            "name": "Склад 2"
+          },
+          {
+            "id": 3,
+            "name": "Склад 3"
+          }
+        ]
+      },
+      "ReserveArrayExample": {
+        "value": [
+          {
+            "idReserve": 6,
+            "idProduct": 5,
+            "idOrder": 3,
+            "count": 3
+          },
+          {
+            "idReserve": 7,
+            "idProduct": 23,
+            "idOrder": 3,
+            "count": 6
+          }
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Products",
+      "description": "Операции с продуктами"
+    },
+    {
+      "name": "Users",
+      "description": "Операции с пользователями"
+    },
+    {
+      "name": "Orders",
+      "description": "Операции с заказами"
+    },
+    {
+      "name": "Storages",
+      "description": "Операции со складами"
+    },
+    {
+      "name": "Prices",
+      "description": "Операции с ценами и скидками"
+    }
+  ],
   "paths": {
     "/orders/add": {
       "post": {
@@ -171,11 +557,272 @@
         }
       }
     },
-    "/storages": {
+    "/v1/prices": {
+      "get": {
+        "summary": "Получить цены на все продукты",
+        "tags": [
+          "Prices"
+        ],
+        "responses": {
+          "200": {
+            "description": "Список цен на продукты",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceArray"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/prices/{idProduct}": {
+      "get": {
+        "summary": "Получить цену продукта и акцию",
+        "tags": [
+          "Prices"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idProduct",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Цена продукта и информация об акции",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Price"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Цена для продукта не найдена"
+          }
+        }
+      }
+    },
+    "/v1/products": {
+      "get": {
+        "summary": "Получить список всех продуктов",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный запрос. Возвращает массив продуктов.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Создать новый продукт",
+        "tags": [
+          "Products"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Продукт успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Невалидные входные данные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/products/{idProduct}": {
+      "get": {
+        "summary": "Получить продукт по ID",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный запрос. Возвращает данные продукта.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Продукт не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Частично обновить продукт",
+        "tags": [
+          "Products"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Продукт успешно обновлен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Невалидные входные данные",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Продукт не найден",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервера",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/storages": {
       "get": {
         "summary": "Получить список складов",
         "tags": [
-          "storages"
+          "Storages"
         ],
         "responses": {
           "200": {
@@ -199,16 +846,16 @@
         }
       }
     },
-    "/storages/{id}": {
+    "/v1/storages/{idStorage}": {
       "get": {
         "summary": "Получить склад по ID",
         "tags": [
-          "storages"
+          "Storages"
         ],
         "parameters": [
           {
             "in": "path",
-            "name": "id",
+            "name": "idStorage",
             "required": true,
             "schema": {
               "type": "integer"
@@ -229,11 +876,239 @@
         }
       }
     },
-    "/users": {
+    "/v1/storages/{idStorage}/reserves/{idProduct}": {
+      "post": {
+        "summary": "Зарезервировать товар на складе",
+        "tags": [
+          "Storages"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idStorage",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReserveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Товар успешно зарезервирован",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reserve"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные параметры запроса"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Удалить резерв товара со склада",
+        "tags": [
+          "Storages"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idStorage",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "idOrder": {
+                    "type": "integer",
+                    "example": 3
+                  }
+                },
+                "required": [
+                  "idOrder"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Резерв успешно удален"
+          },
+          "404": {
+            "description": "Резерв не найден"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Изменить количество резерва товара",
+        "tags": [
+          "Storages"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idStorage",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReserveInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Количество резерва изменено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Reserve"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Неверные параметры запроса"
+          }
+        }
+      }
+    },
+    "/v1/storages/{idStorage}/reserves": {
+      "get": {
+        "summary": "Получить резервы товаров по заказу",
+        "tags": [
+          "Storages"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idStorage",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idOrder",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список резервов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reserve"
+                  }
+                },
+                "examples": {
+                  "example-1": {
+                    "$ref": "#/components/examples/ReserveArrayExample"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не указан idOrder"
+          }
+        }
+      }
+    },
+    "/v1/users": {
+      "post": {
+        "summary": "Добавить пользователя",
+        "tags": [
+          "Users"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Пользователь успешно создан",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "summary": "Получить список пользователей",
         "tags": [
-          "users"
+          "Users"
         ],
         "responses": {
           "200": {
@@ -243,7 +1118,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/user"
+                    "$ref": "#/components/schemas/User"
                   }
                 }
               }
@@ -252,16 +1127,16 @@
         }
       }
     },
-    "/users/{id}": {
+    "/v1/users/{idUser}": {
       "get": {
         "summary": "Получить пользователя по ID",
         "tags": [
-          "users"
+          "Users"
         ],
         "parameters": [
           {
             "in": "path",
-            "name": "id",
+            "name": "idUser",
             "required": true,
             "schema": {
               "type": "integer"
@@ -274,7 +1149,304 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/user"
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Изменить данные пользователя",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Алеша Алексеевич"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Данные пользователя обновлены",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{idUser}/orders": {
+      "post": {
+        "summary": "Создать новый заказ или получить существующий",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ создан или получен",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Получить заказы пользователя по статусу",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string",
+              "example": "closed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Список заказов",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/users/{idUser}/orders/{idOrder}": {
+      "post": {
+        "summary": "Добавить товар в заказ",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idOrder",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Товар добавлен в заказ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Изменить количество товара в заказе",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idOrder",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Количество товара изменено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Удалить товар из заказа",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idOrder",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Товар удален из заказа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Получить заказ по ID",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idUser",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "idOrder",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Данные заказа",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
                 }
               }
             }
@@ -282,115 +1454,5 @@
         }
       }
     }
-  },
-  "components": {
-    "schemas": {
-      "Order": {
-        "type": "object",
-        "properties": {
-          "idOrder": {
-            "type": "integer",
-            "example": 1
-          },
-          "idUser": {
-            "type": "integer",
-            "example": 123
-          },
-          "region": {
-            "type": "string",
-            "example": "Moscow"
-          }
-        }
-      },
-      "OrderItem": {
-        "type": "object",
-        "properties": {
-          "idProduct": {
-            "type": "integer",
-            "example": 456
-          },
-          "quantity": {
-            "type": "integer",
-            "example": 2
-          },
-          "idStorage": {
-            "type": "integer",
-            "example": 789
-          },
-          "price": {
-            "type": "number",
-            "format": "float",
-            "example": 99.99
-          },
-          "discount": {
-            "type": "number",
-            "format": "float",
-            "example": 10
-          },
-          "promotionId": {
-            "type": "integer",
-            "example": 55
-          }
-        }
-      },
-      "AddProductResponse": {
-        "type": "object",
-        "properties": {
-          "idOrder": {
-            "type": "integer",
-            "example": 1
-          },
-          "quantityAdded": {
-            "type": "integer",
-            "example": 2
-          }
-        }
-      },
-      "Storage": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "name": {
-            "type": "string",
-            "example": "Склад 1"
-          }
-        }
-      },
-      "user": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 1
-          },
-          "name": {
-            "type": "string",
-            "example": "John Doe"
-          }
-        }
-      }
-    },
-    "examples": {
-      "StorageArrayExample": {
-        "value": [
-          {
-            "id": 1,
-            "name": "Склад 1"
-          },
-          {
-            "id": 2,
-            "name": "Склад 2"
-          },
-          {
-            "id": 3,
-            "name": "Склад 3"
-          }
-        ]
-      }
-    }
-  },
-  "tags": []
+  }
 }
