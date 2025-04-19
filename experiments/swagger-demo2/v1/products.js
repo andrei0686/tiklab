@@ -33,26 +33,24 @@ const router = express.Router();
  *       properties:
  *         error:
  *           type: string
- *           example: "Product not found"
+ *           example: "продукт не найден"
  *         message:
  *           type: string
- *           example: "The requested product with ID 99 was not found"
+ *           example: "запрошенный ID 99 не найден"
  *         statusCode:
  *           type: integer
  *           example: 404
  */
 
-
-
 /**
  * @swagger
- * /v2/products:
+ * /v1/products:
  *   get:
- *     summary: Получить список продуктов
+ *     summary: Получить список всех продуктов
  *     tags: [Products]
  *     responses:
  *       200:
- *         description: Список продуктов
+ *         description: Успешный запрос. Возвращает массив продуктов.
  *         content:
  *           application/json:
  *             schema:
@@ -71,7 +69,7 @@ router.get('/', (req, res) => {
     res.json([{ idProduct: 1, name: 'Стол', description: 'Обеденный' }]);
   } catch (error) {
     res.status(500).json({ 
-      error: 'Internal Server Error',
+      error: 'Внутреняя ошибка сервера',
       message: error.message,
       statusCode: 500
     });
@@ -92,13 +90,13 @@ router.get('/', (req, res) => {
  *             $ref: '#/components/schemas/ProductInput'
  *     responses:
  *       201:
- *         description: Созданный продукт
+ *         description: Продукт успешно создан
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Product'
  *       400:
- *         description: Неверные входные данные
+ *         description: Невалидные входные данные
  *         content:
  *           application/json:
  *             schema:
@@ -148,7 +146,7 @@ router.post('/', (req, res) => {
  *           example: 1
  *     responses:
  *       200:
- *         description: Данные продукта
+ *         description: Успешный запрос. Возвращает данные продукта.
  *         content:
  *           application/json:
  *             schema:
@@ -171,10 +169,10 @@ router.get('/:idProduct', (req, res) => {
     const { idProduct } = req.params;
     const productId = parseInt(idProduct);
     
-    if (productId > 100) { // Пример условия для имитации ненайденного продукта
+    if (productId > 100) {
       return res.status(404).json({
         error: 'Product not found',
-        message: `The requested product with ID ${idProduct} was not found`,
+        message: `Product with ID ${idProduct} not found`,
         statusCode: 404
       });
     }
@@ -197,7 +195,7 @@ router.get('/:idProduct', (req, res) => {
  * @swagger
  * /v1/products/{idProduct}:
  *   patch:
- *     summary: Обновить продукт
+ *     summary: Частично обновить продукт
  *     tags: [Products]
  *     parameters:
  *       - in: path
@@ -214,13 +212,13 @@ router.get('/:idProduct', (req, res) => {
  *             $ref: '#/components/schemas/ProductInput'
  *     responses:
  *       200:
- *         description: Обновленные данные продукта
+ *         description: Продукт успешно обновлен
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Product'
  *       400:
- *         description: Неверные входные данные
+ *         description: Невалидные входные данные
  *         content:
  *           application/json:
  *             schema:
@@ -252,10 +250,10 @@ router.patch('/:idProduct', (req, res) => {
       });
     }
 
-    if (productId > 100) { // Пример условия для имитации ненайденного продукта
+    if (productId > 100) {
       return res.status(404).json({
-        error: 'Product not found',
-        message: `The requested product with ID ${idProduct} was not found`,
+        error: 'Продукт не найден',
+        message: `продукт ID ${idProduct} не найден`,
         statusCode: 404
       });
     }
@@ -267,7 +265,7 @@ router.patch('/:idProduct', (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ 
-      error: 'Internal Server Error',
+      error: 'внутренняя ошибка',
       message: error.message,
       statusCode: 500
     });

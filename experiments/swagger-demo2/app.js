@@ -1,7 +1,8 @@
 const express = require('express');
-const usersRouter = require('./routes/users'); // Импортируем роутер
-const storagesRouter = require('./routes/storages'); // Импортируем роутер
-const ordersRouter = require('./routes/orders'); // Импортируем роутер
+const usersRouter = require('./v1/users'); // Импортируем роутер
+const storagesRouter = require('./v1/storages'); // Импортируем роутер
+const ordersRouter = require('./v1/orders'); // Импортируем роутер
+const productsRouter = require('./v1/products'); // Импортируем роутер
 
 const swaggerUi = require('swagger-ui-express');
 //const swaggerSpec = require('./swagger-definition');
@@ -11,15 +12,40 @@ const YAML = require('yaml');
 
 // Конфигурация Swagger
 const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: '12 стульев',
-      version: '1.0.0',
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: '12 стульев API',
+        version: '1.0.0',
+        description: 'API для управления продуктами, пользователями и заказами',
+      },
+      servers: [
+        { 
+          url: 'http://localhost:3000/', 
+          description: 'Локальный сервер (v1)' 
+        },
+      ],
+      components: {
+        securitySchemes: {
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+        schemas: {
+          // Перенесите сюда общие схемы из роутеров, если нужно
+        }
+      },
+      tags: [
+        { name: 'Products', description: 'Операции с продуктами' },
+        { name: 'Users', description: 'Операции с пользователями' },
+        { name: 'Orders', description: 'Операции с заказами' },
+        { name: 'Storages', description: 'Операции со складами' }
+      ]
     },
-  },
-  apis: ['./routes/*.js'], // Путь к файлам с JSDoc
-};
+    apis: ['./v1/*.js'], // Путь к файлам с JSDoc
+  };
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
@@ -48,9 +74,10 @@ app.get('/openapi.yaml', (req, res) => {
 
 
 app.use(express.json()); // Middleware для парсинга JSON
-app.use('/users', usersRouter); // Подключаем роутер
-app.use('/storages', storagesRouter); // Подключаем роутер
-app.use('/orders', ordersRouter); // Подключаем роутер
+app.use('/v1/users', usersRouter);
+app.use('/v1/storages', storagesRouter);
+app.use('/v1/orders', ordersRouter);
+app.use('/v1/products', productsRouter);
 
 app.listen(3000, () => {
   console.log('Сервер запущен на http://localhost:3000');
@@ -60,24 +87,33 @@ app.listen(3000, () => {
 });
 
 
-// POST /orders // {idUser:1, region:1} создается новый заказ или возвращается уже созданный {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4},{idProduct:22, count:2,}]} 
-// POST /orders/{idOrder}   // добавление товара в заказ {idUser:1, region:1, idProduct:123, count:4,} возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4},{idProduct:22, count:2,}]} где idOreder номер открытого заказа
-// PATCH /orders/{idOrder}  // изменение количество товара в заказе {idUser:1, region:1, idProduct:123, count:7,} возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4,idProduct:22, count:2,}]} где idOreder номер открытого заказа
-// DELETE /orders/{idOrder}/{idProduct} // удаление товара из заказа. возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4,idProduct:22, count:2,}]} 
-// GET /orders/{idOrder} возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4,idProduct:22, count:2,}]} 
-// GET /orders?iduser={idUser} возвращает заказы пользователя
-// GET /orsers?iduser={idUser}?
-// PUT /orders/product/
+
+
+
+
+// GET /products // получает продукты
+// POST /products // создает продукт {name:"стул", description:"кухонный",...} возвращает  {idProduct:2 , name:"стул", description:"кухонный",...}
+// GET /products/{idProduct} // возвращает описание продукта
+// PATCH /products/{idProduct} // изменяет продукт {name:"стул", description:"обеденный"} возвращает  {idProduct:2 , name:"стул", description:"кухонный",...}
 
 // POST /users/  // добавить пользователя {name:"Вася", phone:444444, address:"", region:"central" }
 // GET /users //выводит список кользователей
 // GET /users/{idUser} //выводит данные пользователя
 // PATCH /users/{idUser} // изменяет данные пользователя  {name:"Вася П" }  возвращает  данные пользователя  {name:"Вася П", phone:444444, address:"", region:"central" }
 
-// GET /products // получает продукты
-// POST /products // создает продукт {name:"стул", description:"кухонный",...} возвращает  {idProduct:2 , name:"стул", description:"кухонный",...}
-// GET /products/{idProduct} // возвращает описание продукта
-// PATCH /products/{idProduct} // изменяет продукт {name:"стул", description:"обеденный"} возвращает  {idProduct:2 , name:"стул", description:"кухонный",...}
+// POST /users/{idUser}/orders // { region:1} создается новый заказ или возвращается уже созданный {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4},{idProduct:22, count:2,}]} 
+// POST /users/{idUser}/orders/{idOrder}   // добавление товара в заказ {idUser:1, region:1, idProduct:123, count:4,} возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4},{idProduct:22, count:2,}]} где idOreder номер открытого заказа
+// PATCH /users/{idUser}/orders/{idOrder}  // изменение количество товара в заказе {idUser:1, region:1, idProduct:123, count:7,} возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4,idProduct:22, count:2,}]} где idOreder номер открытого заказа
+// DELETE /users/{idUser}/orders/{idOrder}?idProduct={idProduct} // удаление товара из заказа. возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4,idProduct:22, count:2,}]} 
+// GET /users/{idUser}/orders/{idOrder} возвращается весь заказ {idUser:1, region:1, idOreder:45, products:[{idProduct:123, count:4,idProduct:22, count:2,}]} 
+// GET /users/{idUser}/orders?state="closed" возвращает закрытые заказы пользователя
+// GET /users/{idUser}/orsers?iduser={idUser}?
+
+// POST /prices  // создает цену на товар {}
+// GET /prices?idProduct={idProduct} // получаем цену продукта
+// GET /prices // получаем цену на все продукты
+
+
 
 // POST /storages/{idStorage}/reserves/{idProduct} // резервирование товара на складе передается { idOrder:3, count: 10 } return {idReserve:6, idProduct:5, idOrder:3, count: 3 } count - сколько удалось зарехервировать.
 // DELETE /storages/{idStorage}/reserves/{idProduct} // закрывает заказ удаля из резерва товар { idOrder:3}
@@ -86,6 +122,3 @@ app.listen(3000, () => {
 // GET /storages/{idStorage}/reserves?idOrder=3 // возвращает все товары зарезервированные под заказ [ {idReserve:6, idProduct:5, idOrder:3, count: 3 }, {idReserve:7, idProduct:23, idOrder:3, count: 6 } ]
 
 
-// POST /prices  // создает цену на товар {}
-// GET /prices?idProduct={idProduct} // получаем цену продукта
-// GET /
