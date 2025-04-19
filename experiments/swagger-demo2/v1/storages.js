@@ -142,54 +142,7 @@ router.get('/:idStorage', (req, res) => {
   }
   res.json({ id: req.params.idStorage, name: 'Склад ' + req.params.idStorage });
 });
-
-/**
- * @swagger
- * /v1/storages/{idStorage}/reserves:
- *   post:
- *     summary: Зарезервировать товар на складе
- *     tags: [Storages]
- *     parameters:
- *       - in: path
- *         name: idStorage
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/ReserveInput'
- *     responses:
- *       201:
- *         description: Товар успешно зарезервирован
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Reserve'
- *       400:
- *         description: Неверные параметры запроса
- *       404:
- *         description: Склад не найден
- */
-router.post('/:idStorage/reserves', (req, res) => {
-  const { isValid, error } = validateReserveInput(req.body);
-  if (!isValid) {
-    return res.status(400).json({ error });
-  }
-
-  const { idProduct, idOrder, count } = req.body;
-  const reservedCount = Math.min(count, 3);
-  
-  res.status(201).json({
-    idReserve: 6,
-    idProduct: Number(idProduct),
-    idOrder: Number(idOrder),
-    count: reservedCount
-  });
-});
-
+ 
 /**
  * @swagger
  * /v1/storages/{idStorage}/reserves:
@@ -234,7 +187,7 @@ router.delete('/:idStorage/reserves', (req, res) => {
  * @swagger
  * /v1/storages/{idStorage}/reserves:
  *   patch:
- *     summary: Изменить количество резерва товара (count:0 - отмена резерва)
+ *     summary: Зарезервировать товар на складе (count:0 - отмена резерва)
  *     tags: [Storages]
  *     parameters:
  *       - in: path
@@ -249,12 +202,12 @@ router.delete('/:idStorage/reserves', (req, res) => {
  *           schema:
  *             $ref: '#/components/schemas/ReserveInput'
  *           examples:
- *             normalUpdate:
+ *             Резервирование товар:
  *               value:
  *                 idProduct: 5
  *                 idOrder: 3
  *                 count: 10
- *             cancelReserve:
+ *             Отмена резерва:
  *               value:
  *                 idProduct: 5
  *                 idOrder: 3
