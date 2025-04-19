@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-
 /**
  * @swagger
  * components:
@@ -64,15 +63,22 @@ const router = express.Router();
  *           idProduct: 23
  *           idOrder: 3
  *           count: 6
+ *     ReserveCancelExample:
+ *       value:
+ *         idReserve: 6
+ *         idProduct: 5
+ *         idOrder: 3
+ *         count: 0
+ *         message: "Резерв отменен"
  */
 
 // Вспомогательная функция для валидации
 const validateReserveInput = (input) => {
-  if (!input.idProduct || !input.idOrder || !input.count) {
+  if (!input.idProduct || !input.idOrder || input.count === undefined) {
     return { isValid: false, error: "Все поля (idProduct, idOrder, count) обязательны" };
   }
-  if (input.count <= 0) {
-    return { isValid: false, error: "Количество должно быть больше 0" };
+  if (input.count < 0) {
+    return { isValid: false, error: "Количество не может быть отрицательным" };
   }
   return { isValid: true };
 };
@@ -232,7 +238,7 @@ router.delete('/:idStorage/reserves', (req, res) => {
  * @swagger
  * /v1/storages/{idStorage}/reserves:
  *   patch:
- *     summary: Изменить количество резерва товара
+ *     summary: Изменить количество резерва товара (count:0 - отмена резерва)
  *     tags: [Storages]
  *     parameters:
  *       - in: path
@@ -246,6 +252,17 @@ router.delete('/:idStorage/reserves', (req, res) => {
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/ReserveInput'
+ *           examples:
+ *             normalUpdate:
+ *               value:
+ *                 idProduct: 5
+ *                 idOrder: 3
+ *                 count: 10
+ *             cancelReserve:
+ *               value:
+ *                 idProduct: 5
+ *                 idOrder: 3
+ *                 count: 0
  *     responses:
  *       200:
  *         description: Количество резерва изменено
@@ -253,6 +270,15 @@ router.delete('/:idStorage/reserves', (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Reserve'
+ *             examples:
+ *               normalResponse:
+ *                 value:
+ *                   idReserve: 6
+ *                   idProduct: 5
+ *                   idOrder: 3
+ *                   count: 10
+ *               cancelResponse:
+ *                 $ref: '#/components/examples/ReserveCancelExample'
  *       400:
  *         description: Неверные параметры запроса
  *       404:
@@ -265,15 +291,26 @@ router.patch('/:idStorage/reserves', (req, res) => {
   }
 
   const { idProduct, idOrder, count } = req.body;
-  const reservedCount = Math.min(count, 18);
   
+  // Обработка отмены резерва (count = 0)
+  if (count === 0) {
+    return res.json({
+      idReserve: 6,
+      idProduct: Number(idProduct),
+      idOrder: Number(idOrder),
+      count: 0,
+      message: "Резерв отменен"
+    });
+  }
+
   res.json({
     idReserve: 6,
     idProduct: Number(idProduct),
     idOrder: Number(idOrder),
-    count: reservedCount
+    count: count
   });
 });
+
 
 /**
  * @swagger
