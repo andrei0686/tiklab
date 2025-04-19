@@ -123,7 +123,7 @@ router.get('/', (req, res) => {
     });
   }
 
-  // Моковые данные (в реальном приложении - запрос к БД)
+  // в реальном приложении - запрос к БД
   const allPrices = Array.from({length: 100}, (_, i) => ({
     idProduct: 4,
     idStorage: (i % 3) + 1, // 1-3 склада
@@ -145,7 +145,7 @@ router.get('/', (req, res) => {
  * @swagger
  * /v1/prices/{idProduct}:
  *   get:
- *     summary: Получить цену продукта и акцию
+ *     summary: Получить цены продукта по всем складам и акциям
  *     tags: [Prices]
  *     parameters:
  *       - in: path
@@ -155,26 +155,64 @@ router.get('/', (req, res) => {
  *           type: integer
  *     responses:
  *       200:
- *         description: Цена продукта и информация об акции
+ *         description: Массив цен продукта для разных складов и акций
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Price'
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Price'
+ *             example:
+ *               - idProduct: 4
+ *                 idStorage: 1
+ *                 idPromotion: 4
+ *                 price: 332
+ *                 sale: 15
+ *                 count: 8
+ *               - idProduct: 4
+ *                 idStorage: 2
+ *                 idPromotion: 5
+ *                 price: 300
+ *                 sale: 10
+ *                 count: 6
+ *               - idProduct: 4
+ *                 idStorage: 3
+ *                 idPromotion: 6
+ *                 price: 400
+ *                 sale: 20
+ *                 count: 3
  *       404:
- *         description: Цена для продукта не найдена
+ *         description: Цены для продукта не найдены
  */
 router.get('/:idProduct', (req, res) => {
   const { idProduct } = req.params;
   
   // Пример ответа - в реальном приложении нужно получать данные из БД
-  res.json({
+  res.json([{
     idProduct: Number(idProduct),
     idStorage: 1,
     idPromotion: 4,
     price: 332,
     sale: 15,
+    count: 8
+  }, 
+  {
+    idProduct: Number(idProduct),
+    idStorage: 2,
+    idPromotion: 5,
+    price: 300,
+    sale: 10,
     count: 6
-  });
+  },
+  {
+    idProduct: Number(idProduct),
+    idStorage: 3,
+    idPromotion: 6,
+    price: 400,
+    sale: 20,
+    count: 3
+  },
+]);
 });
 
 module.exports = router;
