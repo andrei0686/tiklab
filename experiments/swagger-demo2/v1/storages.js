@@ -32,6 +32,9 @@ const router = express.Router();
  *     ReserveInput:
  *       type: object
  *       properties:
+ *         idProduct:
+ *           type: integer
+ *           example: 5
  *         idOrder:
  *           type: integer
  *           example: 3
@@ -39,6 +42,7 @@ const router = express.Router();
  *           type: integer
  *           example: 10
  *       required:
+ *         - idProduct
  *         - idOrder
  *         - count
  *   examples:
@@ -61,6 +65,17 @@ const router = express.Router();
  *           idOrder: 3
  *           count: 6
  */
+
+// Вспомогательная функция для валидации
+const validateReserveInput = (input) => {
+  if (!input.idProduct || !input.idOrder || !input.count) {
+    return { isValid: false, error: "Все поля (idProduct, idOrder, count) обязательны" };
+  }
+  if (input.count <= 0) {
+    return { isValid: false, error: "Количество должно быть больше 0" };
+  }
+  return { isValid: true };
+};
 
 /**
  * @swagger
@@ -108,25 +123,29 @@ router.get('/', (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Storage'
+ *       404:
+ *         description: Склад не найден
  */
 router.get('/:idStorage', (req, res) => {
+  if (req.params.idStorage > 3) {
+    return res.status(404).json({
+      error: `Склад ${req.params.idStorage} не найден`,
+      message: `Склад ${req.params.idStorage} не найден`,
+      statusCode: 404
+    });
+  }
   res.json({ id: req.params.idStorage, name: 'Склад ' + req.params.idStorage });
 });
 
 /**
  * @swagger
- * /v1/storages/{idStorage}/reserves/{idProduct}:
+ * /v1/storages/{idStorage}/reserves:
  *   post:
  *     summary: Зарезервировать товар на складе
  *     tags: [Storages]
  *     parameters:
  *       - in: path
  *         name: idStorage
- *         required: true
- *         schema:
- *           type: integer
- *       - in: path
- *         name: idProduct
  *         required: true
  *         schema:
  *           type: integer
@@ -137,7 +156,7 @@ router.get('/:idStorage', (req, res) => {
  *           schema:
  *             $ref: '#/components/schemas/ReserveInput'
  *     responses:
- *       200:
+ *       201:
  *         description: Товар успешно зарезервирован
  *         content:
  *           application/json:
@@ -145,33 +164,35 @@ router.get('/:idStorage', (req, res) => {
  *               $ref: '#/components/schemas/Reserve'
  *       400:
  *         description: Неверные параметры запроса
+ *       404:
+ *         description: Склад не найден
  */
-router.post('/:idStorage/reserves/:idProduct', (req, res) => {
-  const { idOrder, count } = req.body;
-  const reservedCount = Math.min(count, 3); // Пример логики резервирования
+router.post('/:idStorage/reserves', (req, res) => {
+  const { isValid, error } = validateReserveInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ error });
+  }
+
+  const { idProduct, idOrder, count } = req.body;
+  const reservedCount = Math.min(count, 3);
   
-  res.json({
+  res.status(201).json({
     idReserve: 6,
-    idProduct: req.params.idProduct,
-    idOrder,
+    idProduct: Number(idProduct),
+    idOrder: Number(idOrder),
     count: reservedCount
   });
 });
 
 /**
  * @swagger
- * /v1/storages/{idStorage}/reserves/{idProduct}:
+ * /v1/storages/{idStorage}/reserves:
  *   delete:
- *     summary: Удалить резерв товара со склада
+ *     summary: Удалить резерв товара
  *     tags: [Storages]
  *     parameters:
  *       - in: path
  *         name: idStorage
- *         required: true
- *         schema:
- *           type: integer
- *       - in: path
- *         name: idProduct
  *         required: true
  *         schema:
  *           type: integer
@@ -182,35 +203,40 @@ router.post('/:idStorage/reserves/:idProduct', (req, res) => {
  *           schema:
  *             type: object
  *             properties:
+ *               idProduct:
+ *                 type: integer
  *               idOrder:
  *                 type: integer
- *                 example: 3
  *             required:
+ *               - idProduct
  *               - idOrder
  *     responses:
- *       200:
+ *       204:
  *         description: Резерв успешно удален
+ *       400:
+ *         description: Неверные параметры запроса
  *       404:
  *         description: Резерв не найден
  */
-router.delete('/:idStorage/reserves/:idProduct', (req, res) => {
-  res.status(200).json({ message: 'Резерв удален' });
+router.delete('/:idStorage/reserves', (req, res) => {
+  const { idProduct, idOrder } = req.body;
+  if (!idProduct || !idOrder) {
+    return res.status(400).json({ error: "Необходимо указать idProduct и idOrder" });
+  }
+  
+  // Логика удаления резерва
+  res.status(204).end();
 });
 
 /**
  * @swagger
- * /v1/storages/{idStorage}/reserves/{idProduct}:
+ * /v1/storages/{idStorage}/reserves:
  *   patch:
  *     summary: Изменить количество резерва товара
  *     tags: [Storages]
  *     parameters:
  *       - in: path
  *         name: idStorage
- *         required: true
- *         schema:
- *           type: integer
- *       - in: path
- *         name: idProduct
  *         required: true
  *         schema:
  *           type: integer
@@ -229,14 +255,22 @@ router.delete('/:idStorage/reserves/:idProduct', (req, res) => {
  *               $ref: '#/components/schemas/Reserve'
  *       400:
  *         description: Неверные параметры запроса
+ *       404:
+ *         description: Резерв не найден
  */
-router.patch('/:idStorage/reserves/:idProduct', (req, res) => {
-  const { idOrder, count } = req.body;
-  const reservedCount = Math.min(count, 18); // Пример логики изменения резерва
+router.patch('/:idStorage/reserves', (req, res) => {
+  const { isValid, error } = validateReserveInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ error });
+  }
+
+  const { idProduct, idOrder, count } = req.body;
+  const reservedCount = Math.min(count, 18);
   
   res.json({
     idReserve: 6,
-    idOrder,
+    idProduct: Number(idProduct),
+    idOrder: Number(idOrder),
     count: reservedCount
   });
 });
@@ -275,6 +309,9 @@ router.patch('/:idStorage/reserves/:idProduct', (req, res) => {
  */
 router.get('/:idStorage/reserves', (req, res) => {
   const { idOrder } = req.query;
+  if (!idOrder) {
+    return res.status(400).json({ error: "Необходимо указать idOrder" });
+  }
   
   res.json([
     { idReserve: 6, idProduct: 5, idOrder: Number(idOrder), count: 3 },

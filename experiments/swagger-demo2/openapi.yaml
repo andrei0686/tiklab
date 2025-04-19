@@ -170,6 +170,9 @@ components:
     ReserveInput:
       type: object
       properties:
+        idProduct:
+          type: integer
+          example: 5
         idOrder:
           type: integer
           example: 3
@@ -177,6 +180,7 @@ components:
           type: integer
           example: 10
       required:
+        - idProduct
         - idOrder
         - count
     User:
@@ -566,7 +570,9 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Storage"
-  "/v1/storages/{idStorage}/reserves/{idProduct}":
+        "404":
+          description: Склад не найден
+  "/v1/storages/{idStorage}/reserves":
     post:
       summary: Зарезервировать товар на складе
       tags:
@@ -577,11 +583,6 @@ paths:
           required: true
           schema:
             type: integer
-        - in: path
-          name: idProduct
-          required: true
-          schema:
-            type: integer
       requestBody:
         required: true
         content:
@@ -589,7 +590,7 @@ paths:
             schema:
               $ref: "#/components/schemas/ReserveInput"
       responses:
-        "200":
+        "201":
           description: Товар успешно зарезервирован
           content:
             application/json:
@@ -597,18 +598,15 @@ paths:
                 $ref: "#/components/schemas/Reserve"
         "400":
           description: Неверные параметры запроса
+        "404":
+          description: Склад не найден
     delete:
-      summary: Удалить резерв товара со склада
+      summary: Удалить резерв товара
       tags:
         - Storages
       parameters:
         - in: path
           name: idStorage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          name: idProduct
           required: true
           schema:
             type: integer
@@ -619,14 +617,18 @@ paths:
             schema:
               type: object
               properties:
+                idProduct:
+                  type: integer
                 idOrder:
                   type: integer
-                  example: 3
               required:
+                - idProduct
                 - idOrder
       responses:
-        "200":
+        "204":
           description: Резерв успешно удален
+        "400":
+          description: Неверные параметры запроса
         "404":
           description: Резерв не найден
     patch:
@@ -636,11 +638,6 @@ paths:
       parameters:
         - in: path
           name: idStorage
-          required: true
-          schema:
-            type: integer
-        - in: path
-          name: idProduct
           required: true
           schema:
             type: integer
@@ -659,7 +656,8 @@ paths:
                 $ref: "#/components/schemas/Reserve"
         "400":
           description: Неверные параметры запроса
-  "/v1/storages/{idStorage}/reserves":
+        "404":
+          description: Резерв не найден
     get:
       summary: Получить резервы товаров по заказу
       tags:

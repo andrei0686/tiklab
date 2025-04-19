@@ -238,6 +238,10 @@
       "ReserveInput": {
         "type": "object",
         "properties": {
+          "idProduct": {
+            "type": "integer",
+            "example": 5
+          },
           "idOrder": {
             "type": "integer",
             "example": 3
@@ -248,6 +252,7 @@
           }
         },
         "required": [
+          "idProduct",
           "idOrder",
           "count"
         ]
@@ -872,11 +877,14 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Склад не найден"
           }
         }
       }
     },
-    "/v1/storages/{idStorage}/reserves/{idProduct}": {
+    "/v1/storages/{idStorage}/reserves": {
       "post": {
         "summary": "Зарезервировать товар на складе",
         "tags": [
@@ -886,14 +894,6 @@
           {
             "in": "path",
             "name": "idStorage",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idProduct",
             "required": true,
             "schema": {
               "type": "integer"
@@ -911,7 +911,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Товар успешно зарезервирован",
             "content": {
               "application/json": {
@@ -923,11 +923,14 @@
           },
           "400": {
             "description": "Неверные параметры запроса"
+          },
+          "404": {
+            "description": "Склад не найден"
           }
         }
       },
       "delete": {
-        "summary": "Удалить резерв товара со склада",
+        "summary": "Удалить резерв товара",
         "tags": [
           "Storages"
         ],
@@ -935,14 +938,6 @@
           {
             "in": "path",
             "name": "idStorage",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idProduct",
             "required": true,
             "schema": {
               "type": "integer"
@@ -956,12 +951,15 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "idProduct": {
+                    "type": "integer"
+                  },
                   "idOrder": {
-                    "type": "integer",
-                    "example": 3
+                    "type": "integer"
                   }
                 },
                 "required": [
+                  "idProduct",
                   "idOrder"
                 ]
               }
@@ -969,8 +967,11 @@
           }
         },
         "responses": {
-          "200": {
+          "204": {
             "description": "Резерв успешно удален"
+          },
+          "400": {
+            "description": "Неверные параметры запроса"
           },
           "404": {
             "description": "Резерв не найден"
@@ -986,14 +987,6 @@
           {
             "in": "path",
             "name": "idStorage",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "in": "path",
-            "name": "idProduct",
             "required": true,
             "schema": {
               "type": "integer"
@@ -1023,11 +1016,12 @@
           },
           "400": {
             "description": "Неверные параметры запроса"
+          },
+          "404": {
+            "description": "Резерв не найден"
           }
         }
-      }
-    },
-    "/v1/storages/{idStorage}/reserves": {
+      },
       "get": {
         "summary": "Получить резервы товаров по заказу",
         "tags": [
