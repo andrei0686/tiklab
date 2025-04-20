@@ -215,4 +215,109 @@ router.get('/:idProduct', (req, res) => {
 ]);
 });
 
+/**
+ * @swagger
+ * /v1/prices/promotion/:
+ *   delete:
+ *     summary: Применение товара к акции. удаление из резерва акций. (idorder, idproduct, idstorage)
+ *     tags: [Prices]
+ *     parameters:
+ *       - in: query
+ *         name: idorder
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID заказа
+ *       - in: query
+ *         name: idproduct
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID продукта
+ *       - in: query
+ *         name: idstorage
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID склада
+ *     responses:
+ *       200:
+ *         description: Акция успешно применена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Акция успешно применена"
+ *                 deletedParams:
+ *                   type: object
+ *                   properties:
+ *                     idorder:
+ *                       type: integer
+ *                       example: 123
+ *                     idproduct:
+ *                       type: integer
+ *                       example: 4
+ *                     idstorage:
+ *                       type: integer
+ *                       example: 1
+ *       400:
+ *         description: Не хватает обязательных параметров
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "Неверные параметры"
+ *               message: "Необходимо указать idorder, idproduct и idstorage"
+ *               statusCode: 400
+ *       404:
+ *         description: Акция не найдена
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "Акция не найдена"
+ *               message: "Акция с указанными параметрами не найдена"
+ *               statusCode: 404
+ */
+router.delete('/promotion/', (req, res) => {
+    const { idorder, idproduct, idstorage } = req.query;
+  
+    // Проверка наличия всех обязательных параметров
+    if (!idorder || !idproduct || !idstorage) {
+      return res.status(400).json({
+        error: 'Неверные параметры',
+        message: 'Необходимо указать idorder, idproduct и idstorage',
+        statusCode: 400
+      });
+    }
+  
+    // Здесь должна быть логика удаления из БД
+    // В демонстрационных целях просто возвращаем успешный ответ
+    
+    // Пример проверки существования записи (в реальном приложении - запрос к БД)
+    const priceExists = true; // предположим, что запись существует
+    
+    if (!priceExists) {
+      return res.status(404).json({
+        error: 'Акция не найдена',
+        message: 'Акция с указанными параметрами не найдена',
+        statusCode: 404
+      });
+    }
+  
+    res.json({
+      message: 'Акция успешно удалена',
+      deletedParams: {
+        idorder: Number(idorder),
+        idproduct: Number(idproduct),
+        idstorage: Number(idstorage)
+      }
+    });
+  });
+
 module.exports = router;

@@ -20,84 +20,9 @@
       }
     },
     "schemas": {
-      "Order": {
-        "type": "object",
-        "properties": {
-          "idOrder": {
-            "type": "integer",
-            "example": 45
-          },
-          "idUser": {
-            "type": "integer",
-            "example": 1
-          },
-          "region": {
-            "type": "string",
-            "example": "1"
-          },
-          "products": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrderItem"
-            }
-          }
-        }
-      },
-      "OrderItem": {
-        "type": "object",
-        "properties": {
-          "idProduct": {
-            "type": "integer",
-            "example": 123
-          },
-          "quantity": {
-            "type": "integer",
-            "example": 2
-          },
-          "idStorage": {
-            "type": "integer",
-            "example": 789
-          },
-          "price": {
-            "type": "number",
-            "format": "float",
-            "example": 99.99
-          },
-          "discount": {
-            "type": "number",
-            "format": "float",
-            "example": 10
-          },
-          "promotionId": {
-            "type": "integer",
-            "example": 55
-          },
-          "count": {
-            "type": "integer",
-            "example": 4
-          }
-        }
-      },
-      "AddProductResponse": {
-        "type": "object",
-        "properties": {
-          "idOrder": {
-            "type": "integer",
-            "example": 1
-          },
-          "quantityAdded": {
-            "type": "integer",
-            "example": 2
-          }
-        }
-      },
       "Price": {
         "type": "object",
         "properties": {
-          "idPrice": {
-            "type": "integer",
-            "example": 3
-          },
           "idProduct": {
             "type": "integer",
             "example": 4
@@ -125,31 +50,37 @@
           }
         }
       },
-      "PriceArray": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Price"
-        },
-        "example": [
-          {
-            "idPrice": 3,
-            "idProduct": 4,
-            "idStorage": 1,
-            "idPromotion": 4,
-            "price": 332,
-            "sale": 15,
-            "count": 6
+      "PaginatedPrices": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "integer",
+            "example": 100
           },
-          {
-            "idPrice": 2,
-            "idProduct": 4,
-            "idStorage": 2,
-            "idPromotion": 4,
-            "price": 332,
-            "sale": 10,
-            "count": 16
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Price"
+            }
           }
-        ]
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Неверные параметры"
+          },
+          "message": {
+            "type": "string",
+            "example": "limit должен быть между 1 и 100"
+          },
+          "statusCode": {
+            "type": "integer",
+            "example": 400
+          }
+        }
       },
       "Product": {
         "type": "object",
@@ -184,20 +115,18 @@
           "name"
         ]
       },
-      "Error": {
+      "PaginatedProducts": {
         "type": "object",
         "properties": {
-          "error": {
-            "type": "string",
-            "example": "продукт не найден"
-          },
-          "message": {
-            "type": "string",
-            "example": "запрошенный ID 99 не найден"
-          },
-          "statusCode": {
+          "totalItems": {
             "type": "integer",
-            "example": 404
+            "example": 100
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
           }
         }
       },
@@ -266,7 +195,7 @@
           },
           "name": {
             "type": "string",
-            "example": "Вася Пупкин"
+            "example": "Гена крокодил"
           },
           "phone": {
             "type": "string",
@@ -277,8 +206,8 @@
             "example": ""
           },
           "region": {
-            "type": "string",
-            "example": "центральный"
+            "type": "integer",
+            "example": 1
           }
         }
       },
@@ -298,8 +227,8 @@
             "example": ""
           },
           "region": {
-            "type": "string",
-            "example": "центральный"
+            "type": "integer",
+            "example": 1
           }
         },
         "required": [
@@ -308,12 +237,48 @@
           "region"
         ]
       },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "idOrder": {
+            "type": "integer",
+            "example": 45
+          },
+          "idUser": {
+            "type": "integer",
+            "example": 1
+          },
+          "region": {
+            "type": "integer",
+            "example": 1
+          },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            }
+          }
+        }
+      },
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "idProduct": {
+            "type": "integer",
+            "example": 123
+          },
+          "count": {
+            "type": "integer",
+            "example": 4
+          }
+        }
+      },
       "OrderInput": {
         "type": "object",
         "properties": {
           "region": {
-            "type": "string",
-            "example": "1"
+            "type": "integer",
+            "example": 1
           }
         },
         "required": [
@@ -370,211 +335,104 @@
             "count": 6
           }
         ]
+      },
+      "ReserveCancelExample": {
+        "value": {
+          "idReserve": 6,
+          "idProduct": 5,
+          "idOrder": 3,
+          "count": 0,
+          "message": "Резерв отменен"
+        }
       }
     }
   },
   "tags": [
     {
-      "name": "Products",
-      "description": "Операции с продуктами"
-    },
-    {
-      "name": "Users",
-      "description": "Операции с пользователями"
-    },
-    {
-      "name": "Orders",
-      "description": "Операции с заказами"
-    },
-    {
       "name": "Storages",
       "description": "Операции со складами"
     },
     {
+      "name": "Products",
+      "description": "Операции с продуктами"
+    },
+    {
       "name": "Prices",
       "description": "Операции с ценами и скидками"
+    },
+    {
+      "name": "Users",
+      "description": "Операции с пользователями"
     }
   ],
   "paths": {
-    "/orders/add": {
-      "post": {
-        "summary": "Добавить товар в заказ",
+    "/v1/prices": {
+      "get": {
+        "summary": "Получить цены с пагинацией (limit/offset)",
         "tags": [
-          "Orders"
+          "Prices"
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "idUser": {
-                    "type": "integer"
-                  },
-                  "idProduct": {
-                    "type": "integer"
-                  },
-                  "region": {
-                    "type": "string"
-                  },
-                  "quantity": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "idUser",
-                  "idProduct",
-                  "region",
-                  "quantity"
-                ],
-                "example": {
-                  "idUser": 123,
-                  "idProduct": 456,
-                  "region": "Moscow",
-                  "quantity": 2
-                }
-              }
-            }
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Количество элементов на странице"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Смещение от начала списка"
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Товар успешно добавлен",
+            "description": "Список цен с пагинацией",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddProductResponse"
+                  "$ref": "#/components/schemas/PaginatedPrices"
+                },
+                "example": {
+                  "totalItems": 100,
+                  "prices": [
+                    {
+                      "idProduct": 4,
+                      "idStorage": 1,
+                      "idPromotion": 4,
+                      "price": 332,
+                      "sale": 15,
+                      "count": 6
+                    },
+                    {
+                      "idProduct": 4,
+                      "idStorage": 2,
+                      "idPromotion": 4,
+                      "price": 332,
+                      "sale": 10,
+                      "count": 16
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Неверные параметры запроса"
-          }
-        }
-      }
-    },
-    "/orders/{idOrder}/remove": {
-      "delete": {
-        "summary": "Удалить товар из заказа",
-        "tags": [
-          "Orders"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idOrder",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "idProduct": {
-                    "type": "integer"
-                  },
-                  "quantity": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "idProduct",
-                  "quantity"
-                ],
-                "example": {
-                  "idProduct": 456,
-                  "quantity": 1
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Товар успешно удален из заказа",
+            "description": "Неверные параметры пагинации",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "example": {
-                    "success": true,
-                    "message": "Товар удален из заказа"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Заказ или товар не найден"
-          }
-        }
-      }
-    },
-    "/orders/{idOrder}/items": {
-      "get": {
-        "summary": "Получить список товаров в заказе",
-        "tags": [
-          "Orders"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idOrder",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Список товаров в заказе",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/OrderItem"
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Заказ не найден"
-          }
-        }
-      }
-    },
-    "/v1/prices": {
-      "get": {
-        "summary": "Получить цены на все продукты",
-        "tags": [
-          "Prices"
-        ],
-        "responses": {
-          "200": {
-            "description": "Список цен на продукты",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PriceArray"
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -584,7 +442,7 @@
     },
     "/v1/prices/{idProduct}": {
       "get": {
-        "summary": "Получить цену продукта и акцию",
+        "summary": "Получить цены продукта по всем складам и акциям",
         "tags": [
           "Prices"
         ],
@@ -596,102 +454,213 @@
             "schema": {
               "type": "integer"
             }
-          },
-          {
-            "in": "query",
-            "name": "idProduct",
-            "schema": {
-              "type": "integer"
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Цена продукта и информация об акции",
+            "description": "Массив цен продукта для разных складов и акций",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Price"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Price"
+                  }
+                },
+                "example": [
+                  {
+                    "idProduct": 4,
+                    "idStorage": 1,
+                    "idPromotion": 4,
+                    "price": 332,
+                    "sale": 15,
+                    "count": 8
+                  },
+                  {
+                    "idProduct": 4,
+                    "idStorage": 2,
+                    "idPromotion": 5,
+                    "price": 300,
+                    "sale": 10,
+                    "count": 6
+                  },
+                  {
+                    "idProduct": 4,
+                    "idStorage": 3,
+                    "idPromotion": 6,
+                    "price": 400,
+                    "sale": 20,
+                    "count": 3
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Цены для продукта не найдены"
+          }
+        }
+      }
+    },
+    "/v1/prices/promotion/": {
+      "delete": {
+        "summary": "Применение товара к акции. удаление из резерва акций. (idorder, idproduct, idstorage)",
+        "tags": [
+          "Prices"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "idorder",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID заказа"
+          },
+          {
+            "in": "query",
+            "name": "idproduct",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID продукта"
+          },
+          {
+            "in": "query",
+            "name": "idstorage",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "ID склада"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Акция успешно применена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Акция успешно применена"
+                    },
+                    "deletedParams": {
+                      "type": "object",
+                      "properties": {
+                        "idorder": {
+                          "type": "integer",
+                          "example": 123
+                        },
+                        "idproduct": {
+                          "type": "integer",
+                          "example": 4
+                        },
+                        "idstorage": {
+                          "type": "integer",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не хватает обязательных параметров",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Неверные параметры",
+                  "message": "Необходимо указать idorder, idproduct и idstorage",
+                  "statusCode": 400
                 }
               }
             }
           },
           "404": {
-            "description": "Цена для продукта не найдена"
+            "description": "Акция не найдена",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "error": "Акция не найдена",
+                  "message": "Акция с указанными параметрами не найдена",
+                  "statusCode": 404
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/products": {
       "get": {
-        "summary": "Получить список всех продуктов",
+        "summary": "Получить список продуктов с пагинацией (limit/offset)",
         "tags": [
           "Products"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Количество элементов"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Смещение от начала списка"
+          }
         ],
         "responses": {
           "200": {
-            "description": "Успешный запрос. Возвращает массив продуктов.",
+            "description": "Успешный запрос. Возвращает список продуктов.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Product"
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Создать новый продукт",
-        "tags": [
-          "Products"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProductInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Продукт успешно создан",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Product"
+                  "$ref": "#/components/schemas/PaginatedProducts"
+                },
+                "example": {
+                  "totalItems": 100,
+                  "products": [
+                    {
+                      "idProduct": 1,
+                      "name": "Стол",
+                      "description": "Обеденный"
+                    },
+                    {
+                      "idProduct": 2,
+                      "name": "Стул",
+                      "description": "Кухонный"
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Невалидные входные данные",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
+            "description": "Неверные параметры пагинации",
             "content": {
               "application/json": {
                 "schema": {
@@ -733,85 +702,6 @@
           },
           "404": {
             "description": "Продукт не найден",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Частично обновить продукт",
-        "tags": [
-          "Products"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idProduct",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "example": 1
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProductInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Продукт успешно обновлен",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Product"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Невалидные входные данные",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Продукт не найден",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Внутренняя ошибка сервера",
             "content": {
               "application/json": {
                 "schema": {
@@ -885,50 +775,6 @@
       }
     },
     "/v1/storages/{idStorage}/reserves": {
-      "post": {
-        "summary": "Зарезервировать товар на складе",
-        "tags": [
-          "Storages"
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "idStorage",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReserveInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Товар успешно зарезервирован",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Reserve"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Неверные параметры запроса"
-          },
-          "404": {
-            "description": "Склад не найден"
-          }
-        }
-      },
       "delete": {
         "summary": "Удалить резерв товара",
         "tags": [
@@ -942,30 +788,24 @@
             "schema": {
               "type": "integer"
             }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "idProduct": {
-                    "type": "integer"
-                  },
-                  "idOrder": {
-                    "type": "integer"
-                  }
-                },
-                "required": [
-                  "idProduct",
-                  "idOrder"
-                ]
-              }
+          },
+          {
+            "in": "query",
+            "name": "idProduct",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "idOrder",
+            "required": true,
+            "schema": {
+              "type": "integer"
             }
           }
-        },
+        ],
         "responses": {
           "204": {
             "description": "Резерв успешно удален"
@@ -979,7 +819,7 @@
         }
       },
       "patch": {
-        "summary": "Изменить количество резерва товара",
+        "summary": "Зарезервировать товар на складе (count:0 - отмена резерва)",
         "tags": [
           "Storages"
         ],
@@ -999,6 +839,22 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ReserveInput"
+              },
+              "examples": {
+                "Резервирование товар": {
+                  "value": {
+                    "idProduct": 5,
+                    "idOrder": 3,
+                    "count": 10
+                  }
+                },
+                "Отмена резерва": {
+                  "value": {
+                    "idProduct": 5,
+                    "idOrder": 3,
+                    "count": 0
+                  }
+                }
               }
             }
           }
@@ -1010,6 +866,19 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Reserve"
+                },
+                "examples": {
+                  "normalResponse": {
+                    "value": {
+                      "idReserve": 6,
+                      "idProduct": 5,
+                      "idOrder": 3,
+                      "count": 10
+                    }
+                  },
+                  "cancelResponse": {
+                    "$ref": "#/components/examples/ReserveCancelExample"
+                  }
                 }
               }
             }
@@ -1286,7 +1155,8 @@
             "name": "idUser",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "example": 1
             }
           },
           {
@@ -1294,7 +1164,8 @@
             "name": "idOrder",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "example": 45
             }
           }
         ],
@@ -1315,6 +1186,39 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Не найдено",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "userNotFound": {
+                    "value": {
+                      "error": "Пользователь не найден",
+                      "message": "Пользователь с ID 999 не найден",
+                      "statusCode": 404
+                    }
+                  },
+                  "orderNotFound": {
+                    "value": {
+                      "error": "Заказ не найден",
+                      "message": "Заказ с ID 999 не найден",
+                      "statusCode": 404
+                    }
+                  },
+                  "productNotFound": {
+                    "value": {
+                      "error": "Товар не найден",
+                      "message": "Товар с ID 999 не найден",
+                      "statusCode": 404
+                    }
+                  }
                 }
               }
             }
