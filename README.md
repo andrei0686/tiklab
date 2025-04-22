@@ -3,11 +3,16 @@ experiments каталог для эксперементов
 
 ## backend
 
-проект для серверной части. Уровни Busines, service, repository, database.
+проект для серверной части уровни: 
+- busines 
+- service
+- repository 
+- database
+
 
 ## frontend 
 
-каталог для уровня peresentation
+- peresentation layer
 
 для запуска разработки и отладки перейти в каталог frontend и запустите vite
 ```
