@@ -17,3 +17,14 @@ npm run dev
 ```
 npm run build
 ```
+
+для просмотра версии node
+```
+nvm list
+```
+для пересключения версии node
+```
+nvm use v16.20.2  
+или
+nvm use v20.10.0
+```
