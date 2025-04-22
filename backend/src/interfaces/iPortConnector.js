@@ -3,9 +3,9 @@
  * @class
  * @abstract
  */
-class Connector {
+class iPortConnector {
     /**
-     * Создает экземпляр Connector.
+     * Создает экземпляр iPortConnector.
      * @param {Object} config - Конфигурация подключения.
      * @param {string} config.port - Имя порта (например, "COM3" или "192.168.1.1:8080").
      * @param {number} [config.timeout=5000] - Таймаут подключения в миллисекундах.

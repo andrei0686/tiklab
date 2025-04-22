@@ -1,0 +1,10 @@
+{
+    "source": {
+        "include": [
+            "./interfaces/iPortConnector.js"
+        ]
+    },
+    "opts": {
+        "destination": "./docs"
+    }
+}
