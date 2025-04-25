@@ -165,7 +165,7 @@ function calculateBaudRegisters(baudRate) {
         switch (div) {
             case 0: divider = 1024; break;
             case 1: divider = 128; break;
-            case 2: divider = 16; break;  // Уточните, 15 или 16?
+            case 2: divider = 16; break;  
             case 3: divider = 2; break;
             case 4: divider = 1; break;
         }

@@ -24,9 +24,6 @@ export const useThemeStore = defineStore('theme', {
             if (this._theme) {
                 this._theme.global.name =  this.isDark ?  'dark': 'light'
             }
-        },
-        setVuetifyInstance(vuetify) {
-            this._vuetify = vuetify
         }
     }
 })

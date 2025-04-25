@@ -3,41 +3,29 @@ import HelloWorld from './components/HelloWorld.vue'
 import { useTheme } from 'vuetify'
 import { useThemeStore } from './stores/themeStore'
 import { onMounted } from 'vue'
+import { ref } from 'vue' // Не забудьте импортировать ref
 
 const theme = useTheme() // Корректный вызов внутри setup()
-const themeStore = useThemeStore()
+const themeStore = useThemeStore() //загружаем тему из хранилища
+
+const drawer = ref(false) // Добавляем реактивную переменную для управления drawer
 
 onMounted(() => {
   themeStore.initTheme(theme) // Инициализация темы при загрузке
 })
 
 
-
-// const toggleTheme = () => {
-//   theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark'
-// }
-
-
-
-
-
 </script>
 
 <template>
- 
-  <HelloWorld msg="Vite + Vue" />
-  <div>
-
-    <VBtn @click="themeStore.toggleTheme">
-    {{ themeStore.isDark ? 'Светлая тема' : 'Тёмная тема' }}
-  </VBtn>
-  </div>
-
-  <v-layout class="rounded rounded-md border">
-    <v-app-bar title="Application bar">
-      <v-tooltip bottom>
+   <v-layout class="rounded rounded-md border">
+    <v-app-bar title="Application bar" color="primary">
+    <template v-slot:prepend>
+    <v-app-bar-nav-icon @click.stop="drawer = !drawer"> </v-app-bar-nav-icon>
+  </template>
+      <v-tooltip location="bottom">
                 <template v-slot:activator="{ on: tooltip, attrs }">
-                    <v-btn dark
+                    <v-btn dark 
                           v-bind="attrs"
                           icon
                           @click="themeStore.toggleTheme"
@@ -52,27 +40,18 @@ onMounted(() => {
 
     </v-app-bar>
 
-    <v-navigation-drawer>
+    <v-navigation-drawer  v-model="drawer">
       <v-list nav>
         <v-list-item title="Navigation drawer" link></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
-    <v-main class="d-flex align-center justify-center" height="300">
-      <v-container>
+    <v-main >   
         <router-view v-slot="{ Component }">
             <v-fade-transition hide-on-leave>
               <component :is="Component" />
             </v-fade-transition>
-        </router-view>
-        <v-sheet
-          border="dashed md"
-          color="surface-light"
-          height="200"
-          rounded="lg"
-          width="100%"
-        ></v-sheet>
-      </v-container>
+        </router-view> 
     </v-main>
   </v-layout>
 

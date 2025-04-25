@@ -1,4 +1,4 @@
-# Vue 3 + Vite
+# Vuetify + vue 3 + Vite
 experiments каталог для эксперементов
 
 ## backend
@@ -33,3 +33,12 @@ nvm use v16.20.2
 или
 nvm use v20.10.0
 ```
+```
+npm install express ws cors body-parser uuid
+npm install --save-dev nodemon
+```
+- express – HTTP-сервер
+- ws – WebSocket-сервер
+- cors – обработка CORS
+- uuid – генерация ID для тестов
+- nodemon – автоматическая перезагрузка сервера

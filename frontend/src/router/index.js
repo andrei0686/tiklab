@@ -1,17 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue' // Создайте этот компонент
-
+ 
 const routes = [
   {
     path: '/',
     name: 'home',
     component: Home
   },
-//   {
-//     path: '/about',
-//     name: 'about',
-//     component: () => import('../views/AboutView.vue') // Ленивая загрузка
-//   }
+  {
+    path: '/socket-test',
+    name: 'SocketTest',
+    component:  () => import('../views/SocketTestView.vue') // Ленивая загрузка
+  }
+  // {
+  //   path: '/socktest',
+  //   name: 'about',
+  //   component: () => import('../views/SocketTestView.vue') // Ленивая загрузка
+  // }
 ]
 
 const router = createRouter({
