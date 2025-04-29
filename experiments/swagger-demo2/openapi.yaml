@@ -50,13 +50,13 @@ components:
       properties:
         error:
           type: string
-          example: Неверные параметры
+          example: Пользователь не найден
         message:
           type: string
-          example: limit должен быть между 1 и 100
+          example: Пользователь с ID 999 не найден
         statusCode:
           type: integer
-          example: 400
+          example: 404
     Product:
       type: object
       properties:
@@ -212,6 +212,30 @@ components:
       required:
         - idProduct
         - count
+    ErrorService:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Скдал не доступен
+        message:
+          type: string
+          example: сервис склада не доступен
+        statusCode:
+          type: integer
+          example: 503
+    ErrorInternal:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Внутреняя ошибка сервера
+        message:
+          type: string
+          example: Не достаточно памяти
+        statusCode:
+          type: integer
+          example: 500
   examples:
     StorageArrayExample:
       value:
@@ -777,6 +801,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
               examples:
+                productIsFinished:
+                  value:
+                    error: Товар закончился
+                    message: Товар закончился на складе выберите другой товар
+                    statusCode: 404
                 userNotFound:
                   value:
                     error: Пользователь не найден
@@ -792,6 +821,30 @@ paths:
                     error: Товар не найден
                     message: Товар с ID 999 не найден
                     statusCode: 404
+        "500":
+          description: Внутреняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInternal"
+              examples:
+                internallError:
+                  value:
+                    error: Внутреняя ошибка сервреа
+                    message: Не достаточно памяти
+                    statusCode: 500
+        "503":
+          description: Сервис не доступен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorService"
+              examples:
+                storageNotAvailabel:
+                  value:
+                    error: Склад не доступен
+                    message: Сервис склада не доступен попробуйте позже
+                    statusCode: 503
     patch:
       summary: Изменить количество товара в заказе
       tags:

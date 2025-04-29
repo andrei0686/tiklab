@@ -1,29 +1,63 @@
 import { defineStore } from 'pinia'
+import { io } from 'socket.io-client'
 
 export const useSocketStore = defineStore('socket', {
   state: () => ({
     isConnected: false,
-    messages: []
+    messages: [],
+    socket: null
   }),
   actions: {
     initializeSocket(socket) {
-      socket.on('connect', () => {
+      // Создаем подключение
+      this.socket = socket
+
+      // Обработчики событий
+      this.socket.on('connect', () => {
         this.isConnected = true
+        console.log('Socket connected')
       })
 
-      socket.on('disconnect', () => {
+      this.socket.on('disconnect', () => {
         this.isConnected = false
+        console.log('Socket disconnected')
       })
 
-      socket.on('test_response', (message) => {
-        this.messages.push(message)
+      this.socket.on('test_response', (message) => {
+        this.addMessage(message)
       })
     },
-    sendTestMessage(socket) {
-      socket.emit('test_message', {
-        text: 'Test from Pinia',
-        timestamp: new Date()
-      })
+    
+    sendTestMessage() {
+      if (this.socket && this.isConnected) {
+        this.socket.emit('test_message', {
+          text: 'Тестовое сообщение от клиента',
+          timestamp: new Date().toISOString()
+        })
+      } else {
+        console.error('WebSocket не подключен')
+      }
+    },
+
+    sendControlMessage() {
+      if (this.socket && this.isConnected) {
+        this.socket.emit('control-test', {
+          text: 'Тестовое клиента',
+          timestamp: new Date().toISOString()
+        })
+      } else {
+        console.error('WebSocket не подключен')
+      }
+    },
+    
+    addMessage(message) {
+      this.messages.unshift(message) // Добавляем в начало массива
+    },
+    
+    disconnect() {
+      if (this.socket) {
+        this.socket.disconnect()
+      }
     }
   }
 })

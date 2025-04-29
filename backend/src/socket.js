@@ -26,13 +26,31 @@ module.exports = (io) => {
       })
     })
 
+
+    // Обработка тестового сообщения
+    socket.on('test_message', (data) => {
+      console.log('Получено тестовое сообщение:', data);
+      
+      // Формируем ответ
+      const response = {
+          status: 'success',
+          text: `Сервер получил ваше сообщение: "${data.text}"`,
+          originalData: data,
+          timestamp: new Date().toISOString()
+      };
+      
+      // Отправляем ответ обратно клиенту
+      socket.emit('test_response', response);
+  });
+
     // Управление тестом
-    socket.on('control-test', ({ action, testId }) => {
-      const test = activeTests.get(testId)
-      if (test) {
-        test.status = action
-        socket.emit('test-status', { status: action })
-      }
+    socket.on('control-test', (data) => {
+      console.log('Получено control-test:', data);
+      // const test = activeTests.get(testId)
+      // if (test) {
+      //   test.status = action
+      //   socket.emit('test-status', { status: action })
+      // }
     })
   })
 

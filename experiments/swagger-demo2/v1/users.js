@@ -87,6 +87,42 @@ const router = express.Router();
  *       required:
  *         - idProduct
  *         - count
+ *     Error:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: "Пользователь не найден"
+ *         message:
+ *           type: string
+ *           example: "Пользователь с ID 999 не найден"
+ *         statusCode:
+ *           type: integer
+ *           example: 404
+ *     ErrorService:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: "Скдал не доступен"
+ *         message:
+ *           type: string
+ *           example: "сервис склада не доступен"
+ *         statusCode:
+ *           type: integer
+ *           example: 503 
+ *     ErrorInternal:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: "Внутреняя ошибка сервера"
+ *         message:
+ *           type: string
+ *           example: "Не достаточно памяти"
+ *         statusCode:
+ *           type: integer
+ *           example: 500
  */
 
 /**
@@ -283,6 +319,11 @@ router.post('/:idUser/orders', (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *             examples:
+ *               productIsFinished:
+ *                 value:
+ *                   error: "Товар закончился"
+ *                   message: "Товар закончился на складе выберите другой товар"
+ *                   statusCode: 404
  *               userNotFound:
  *                 value:
  *                   error: "Пользователь не найден"
@@ -298,6 +339,30 @@ router.post('/:idUser/orders', (req, res) => {
  *                   error: "Товар не найден"
  *                   message: "Товар с ID 999 не найден"
  *                   statusCode: 404
+ *       503:
+ *         description: Сервис не доступен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorService'
+ *             examples:
+ *               storageNotAvailabel:
+ *                 value:
+ *                   error: "Склад не доступен"
+ *                   message: "Сервис склада не доступен попробуйте позже"
+ *                   statusCode: 503
+ *       500:
+ *         description: Внутреняя ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorInternal'
+ *             examples:
+ *               internallError:
+ *                 value:
+ *                   error: "Внутреняя ошибка сервреа"
+ *                   message: "Не достаточно памяти"
+ *                   statusCode: 500
  */
 router.post('/:idUser/orders/:idOrder', (req, res) => {
   try {
@@ -342,7 +407,7 @@ router.post('/:idUser/orders/:idOrder', (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: "Internal Server Error",
+      error: "Внутренняя ошибка сервера",
       message: error.message,
       statusCode: 500
     });
