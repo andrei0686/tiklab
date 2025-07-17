@@ -10,6 +10,19 @@ const theme = useTheme() // Корректный вызов внутри setup()
 const themeStore = useThemeStore() //загружаем тему из хранилища
 const socketStore = useSocketStore() // 
 const drawer = ref(true) // Добавляем реактивную переменную для управления drawer
+const selectedItem = ref(null)
+
+const toggleItem = (item) => {
+  if (selectedItem.value === item) {
+    // Повторный клик на тот же элемент: снимаем выделение и закрываем меню
+    selectedItem.value = null;
+    drawer.value = false;
+  } else {
+    // Новый выбор: выделяем элемент и открываем меню
+    selectedItem.value = item;
+    drawer.value = true;
+  }
+};
 
 onMounted(() => {
   themeStore.initTheme(theme) // Инициализация темы при загрузке
@@ -53,13 +66,47 @@ const isConnected = computed(() => socketStore.isConnected)
       </v-tooltip>
 
     </v-app-bar>
+    <!-- Rail-меню -->
+    <v-navigation-drawer permanent rail>
+      <v-list>
+        <v-list-item prepend-avatar="https://randomuser.me/api/portraits/women/75.jpg"></v-list-item>
+      </v-list>
 
+      <v-divider></v-divider>
+
+      <v-list density="compact" nav>
+        <v-list-item
+          prepend-icon="mdi-view-dashboard"
+          value="dashboard"
+          @click="toggleItem('dashboard')"
+          :active="selectedItem === 'dashboard'"
+        ></v-list-item>
+
+        <v-list-item
+          prepend-icon="mdi-forum"
+          value="messages"
+          @click="toggleItem('messages')"
+          :active="selectedItem === 'messages'"
+        ></v-list-item>
+      </v-list>
+    </v-navigation-drawer>
+
+    <!-- Основное меню -->
     <v-navigation-drawer v-model="drawer">
       <v-list nav>
         <v-list-item title="Navigation drawer" link></v-list-item>
+        <v-list-item
+          title="Тест WebSocket"
+          value="socket-test"
+          to="/socket-test"
+          prepend-icon="mdi-socket"
+        ></v-list-item>
+      </v-list>
 
-        <v-list-item title="Тест WebSocket" value="socket-test" to="/socket-test"
-          prepend-icon="mdi-socket"></v-list-item>
+      <v-list>
+        <v-list-item title="Home" value="home"></v-list-item>
+        <v-list-item title="Contacts" value="contacts"></v-list-item>
+        <v-list-item title="Settings" value="settings"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
