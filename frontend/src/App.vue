@@ -68,47 +68,42 @@ const isConnected = computed(() => socketStore.isConnected)
     </v-app-bar>
     <!-- Rail-меню -->
     <v-navigation-drawer permanent rail>
-      <v-list>
-        <v-list-item prepend-avatar="https://randomuser.me/api/portraits/women/75.jpg"></v-list-item>
+      <!-- <v-list>
+        <v-list-item prepend-icon="mdi-view-dashboard"></v-list-item>
       </v-list>
 
-      <v-divider></v-divider>
+      <v-divider></v-divider> -->
 
       <v-list density="compact" nav>
-        <v-list-item
-          prepend-icon="mdi-view-dashboard"
-          value="dashboard"
-          @click="toggleItem('dashboard')"
-          :active="selectedItem === 'dashboard'"
-        ></v-list-item>
-
-        <v-list-item
-          prepend-icon="mdi-forum"
-          value="messages"
-          @click="toggleItem('messages')"
-          :active="selectedItem === 'messages'"
-        ></v-list-item>
+        <v-list-item prepend-icon="mdi-view-dashboard" value="dashboard" @click="toggleItem('dashboard')"
+          :active="selectedItem === 'dashboard'"></v-list-item>
+        <v-list-item prepend-icon="mdi-gauge" value="dashboard" @click="toggleItem('gauge')"
+          :active="selectedItem === 'gauge'"></v-list-item>
+        <v-list-item prepend-icon="mdi-file-cabinet" value="messages" @click="toggleItem('files')"
+          :active="selectedItem === 'files'"></v-list-item>
+        <v-list-item prepend-icon="mdi-forum" value="messages" @click="toggleItem('messages')"
+          :active="selectedItem === 'messages'"></v-list-item>
+        <v-list-item prepend-icon="mdi-cog" value="settings" @click="toggleItem('settings')"
+          :active="selectedItem === 'settings'"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 
     <!-- Основное меню -->
     <v-navigation-drawer v-model="drawer">
       <v-list nav>
-        <v-list-item title="Navigation drawer" link></v-list-item>
-        <v-list-item
-          title="Тест WebSocket"
-          value="socket-test"
-          to="/socket-test"
-          prepend-icon="mdi-socket"
-        ></v-list-item>
+        <v-list-subheader>ОБОЗРЕВАТЕЛЬ</v-list-subheader>
+        <v-list-item title="Тест WebSocket" value="socket-test" to="/socket-test"
+          prepend-icon="mdi-socket"></v-list-item>
       </v-list>
 
       <v-list>
         <v-list-item title="Home" value="home"></v-list-item>
-        <v-list-item title="Contacts" value="contacts"></v-list-item>
+        <v-list-item title="Amplitude" value="Amplitude" to="/amplitude"></v-list-item>
         <v-list-item title="Settings" value="settings"></v-list-item>
       </v-list>
     </v-navigation-drawer>
+
+
 
     <v-main>
       <router-view v-slot="{ Component }">

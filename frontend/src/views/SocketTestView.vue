@@ -7,7 +7,7 @@
                 <v-btn color="primary" @click="sendMessage" :disabled="!isConnected">
                     Отправить тестовое сообщение
                 </v-btn>
-        <v-btn color="primary" @click="sendMessage2" :disabled="!isConnected">
+                <v-btn color="primary" @click="sendMessage2" :disabled="!isConnected">
                     Отправить контрольное сообщение
                 </v-btn>
                 <v-alert class="mt-4" :type="isConnected ? 'success' : 'error'"
@@ -37,7 +37,7 @@ export default {
         ...mapState(useSocketStore, ['isConnected', 'messages'])
     },
     methods: {
-        ...mapActions(useSocketStore, ['sendTestMessage','sendControlMessage']),
+        ...mapActions(useSocketStore, ['sendTestMessage', 'sendControlMessage']),
 
         sendMessage() {
             this.sendTestMessage()

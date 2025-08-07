@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue' // Создайте этот компонент
- 
+import amplitude from '../views/amplitude.vue'
+
 const routes = [
   {
     path: '/',
@@ -11,6 +12,11 @@ const routes = [
     path: '/socket-test',
     name: 'SocketTest',
     component:  () => import('../views/SocketTestView.vue') // Ленивая загрузка
+  },
+  {
+    path: '/amplitude',
+    name: 'amplitude',
+    component:  () => import('../views/amplitude.vue') // Ленивая загрузка
   }
   // {
   //   path: '/socktest',
