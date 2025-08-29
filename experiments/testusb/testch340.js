@@ -1,6 +1,7 @@
 // example CH341  https://gist.github.com/SeanAvery/9232d43fed3797ab1a8636f2e35c9dfc
 // https://git.altlinux.org/gears/k/kernel-source-ch34x.git?p=kernel-source-ch34x.git;a=blob;f=ch34x.c;h=4cb5926922c586cd79ac648b4fdee14a6717476c;hb=8ffe04f27424497ef5e0569ce51c814a4cd797f8
 const usb = require('usb');
+const readline = require('readline');
 
 // Константы для CH341 (из документации WCH)
 const VENDOR_MODEM_OUT = 0xA4
@@ -288,24 +289,76 @@ async function configure(device, baudRate, lcr) {
 
 
 async function sendData(endPoint, data){
-    console.log("Send data " + data)
+  //  console.log("Send data " + data)
     return new Promise((resolve, reject) => {
         endPoint.transfer(data, (err) => {
             if (err) {
+                console.log('ошибка отправки данных');
                 reject(err);
             } else {
-                console.log('Данные успешно отправлены');
+              //  console.log('Данные успешно отправлены');
                 resolve();
             }
         });
     })
 }
 
-
+  console.log('поиск устройства начало');
 // Ищем устройство CH341
 const device = usb.getDeviceList().find(device => {
+       console.log(' устройство '+ device.deviceDescriptor.idVendor);
     return id_table.find(x =>{ return  device.deviceDescriptor.idVendor === x.idVendor &&  device.deviceDescriptor.idProduct === x.idProduct })
 });
+
+   console.log('поиск устройства конец');
+
+
+
+// Функция для запуска непрерывной отправки данных
+async function startContinuousSending(endpoint, data, intervalMs = 100) {
+    let isRunning = true;
+    let packetCount = 0;
+    
+    console.log('Начало непрерывной отправки данных. Нажмите любую клавишу для остановки...');
+    
+    // Устанавливаем обработчик ввода
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    
+    // Обработчик нажатия любой клавиши
+    process.stdin.setRawMode(true);
+    process.stdin.on('data', () => {
+        isRunning = false;
+        console.log('\nОстановка отправки данных...');
+        rl.close();
+    });
+    
+    // Основной цикл отправки
+    while (isRunning && packetCount <= 10000) {
+        try {
+            await sendData(endpoint, data);
+            packetCount++;
+           // console.log(`Отправлено пакетов: ${packetCount}`);
+            
+            // Небольшая задержка между отправками
+            await new Promise(resolve => setTimeout(resolve, intervalMs));
+        } catch (error) {
+            console.error('Ошибка при отправке:', error.message);
+            // Продолжаем отправку несмотря на ошибки
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+
+    if (packetCount > 10000) {
+        console.log('Достигнут лимит в 10000 пакетов. Останавливаем отправку...');
+    }
+
+    // Восстанавливаем нормальный режим ввода
+    process.stdin.setRawMode(false);
+    console.log('Отправка данных завершена. Всего отправлено пакетов:', packetCount);
+}
 
 
 // Главная асинхронная функция
@@ -346,14 +399,21 @@ async function main() {
 
             if (!endpoint) {
                 throw new Error('Не найден выходной endpoint');
-            }
+            }        
 
-            console.log('Отправляем данные...');
-            const data = Buffer.from([0x01, 0x02, 0x03, 0xAA, 0x77, 0x66, 0x11]);
+                // Запускаем непрерывную отправку данных
+            //const data = Buffer.from([0x01, 0x02, 0x03, 0xAA, 0x77, 0x66, 0x11]);
+             const data = Buffer.from([0x55]);
 
-            await sendData(endpoint, data);
+            await startContinuousSending(endpoint, data, 0); // 100ms интервал
+
+
+            // console.log('Отправляем данные...');
+            // const data = Buffer.from([0x01, 0x02, 0x03, 0xAA, 0x77, 0x66, 0x11]);
+
+            // await sendData(endpoint, data);
              
-            console.log('Отправляем данные конец...');
+            // console.log('Отправляем данные конец...');
 
         } catch (err) {
             console.error('Ошибка:', err);
